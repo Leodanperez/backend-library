@@ -11,4 +11,13 @@ public interface LoanJpaRepository extends JpaRepository<LoanEntity, Long>, JpaS
     List<LoanEntity> findByLoanStatusId(Long loanStatusId);
     boolean existsByBookCopyIdAndLoanStatus_Name(Long bookCopyId, String statusName);
     List<LoanEntity> findByLoanStatus_NameAndDueDateBefore(String statusName, LocalDateTime date);
+    List<LoanEntity> findByLoanStatus_NameAndLoanDateBefore(String statusName, LocalDateTime date);
+
+    @org.springframework.data.jpa.repository.Query("""
+        SELECT COUNT(l) > 0 FROM LoanEntity l
+        WHERE l.user.id = :userId
+          AND l.bookCopy.id = :bookCopyId
+          AND l.loanStatus.name NOT IN ('RETURNED', 'CANCELLED')
+        """)
+    boolean existsActiveRequestByUserAndCopy(Long userId, Long bookCopyId);
 }

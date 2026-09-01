@@ -31,7 +31,8 @@ public class DataSeeder implements ApplicationRunner {
 
     private void seedLoanStatuses() {
         List.of(
-                new SeedStatus("PENDING",   "Préstamo pendiente"),
+                new SeedStatus("REQUESTED", "Solicitud de préstamo pendiente de aprobación"),
+                new SeedStatus("PENDING",   "Préstamo aprobado y activo"),
                 new SeedStatus("RETURNED",  "Libro devuelto"),
                 new SeedStatus("OVERDUE",   "Préstamo vencido"),
                 new SeedStatus("CANCELLED", "Préstamo cancelado")

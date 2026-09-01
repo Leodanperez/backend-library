@@ -19,9 +19,12 @@ import java.util.List;
 @Slf4j
 public class OverdueScheduler {
 
+    private static final int REQUESTED_EXPIRY_HOURS = 48;
+
     private final LoanJpaRepository loanRepository;
     private final LoanStatusJpaRepository loanStatusRepository;
 
+    // Cada hora: marca como VENCIDO los préstamos PENDING cuya fecha límite ya pasó
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void markOverdueLoans() {
@@ -35,6 +38,25 @@ public class OverdueScheduler {
 
         overdueLoans.forEach(loan -> loan.setLoanStatus(overdueStatus));
         loanRepository.saveAll(overdueLoans);
-        log.info("Marked {} loan(s) as OVERDUE", overdueLoans.size());
+        log.info("Se marcaron {} préstamo(s) como VENCIDO", overdueLoans.size());
+    }
+
+    // Cada hora: cancela automáticamente solicitudes REQUESTED con más de 48hs sin aprobación
+    @Scheduled(cron = "0 0 * * * *")
+    @Transactional
+    public void cancelExpiredRequests() {
+        LoanStatusEntity cancelledStatus = loanStatusRepository.findByName("CANCELLED")
+                .orElseThrow(() -> new LoanStatusNotFoundException("CANCELLED"));
+
+        LocalDateTime expiryThreshold = LocalDateTime.now().minusHours(REQUESTED_EXPIRY_HOURS);
+        List<LoanEntity> expiredRequests = loanRepository
+                .findByLoanStatus_NameAndLoanDateBefore("REQUESTED", expiryThreshold);
+
+        if (expiredRequests.isEmpty()) return;
+
+        expiredRequests.forEach(loan -> loan.setLoanStatus(cancelledStatus));
+        loanRepository.saveAll(expiredRequests);
+        log.info("Se cancelaron {} solicitud(es) SOLICITADA(S) por vencimiento de {} horas",
+                expiredRequests.size(), REQUESTED_EXPIRY_HOURS);
     }
 }

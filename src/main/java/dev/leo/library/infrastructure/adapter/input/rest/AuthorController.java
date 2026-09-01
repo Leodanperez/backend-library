@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,6 +21,7 @@ public class AuthorController {
     private final AuthorUseCase useCase;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public PaginatedResponse<AuthorEntity> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String nationality,
@@ -30,11 +32,13 @@ public class AuthorController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public AuthorEntity findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody AuthorRequest dto) {
         AuthorEntity saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -44,24 +48,28 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> update(@PathVariable Long id, @Valid @RequestBody AuthorRequest dto) {
         useCase.update(id, dto);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Autor actualizado correctamente"));
     }
 
     @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> activate(@PathVariable Long id) {
         useCase.activate(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Autor activado correctamente"));
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> deactivate(@PathVariable Long id) {
         useCase.deactivate(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Autor desactivado correctamente"));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> delete(@PathVariable Long id) {
         useCase.delete(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Autor eliminado correctamente"));

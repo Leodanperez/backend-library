@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.LoanRequest;
+import dev.leo.library.application.dto.request.LoanRequestDto;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.exception.LoanNotFoundException;
 import dev.leo.library.domain.model.CopyStatus;
@@ -50,6 +51,7 @@ class LoanServiceTest {
 
     private BookCopyEntity copy;
     private UserEntity user;
+    private LoanStatusEntity requestedStatus;
     private LoanStatusEntity pendingStatus;
     private LoanStatusEntity returnedStatus;
     private LoanStatusEntity cancelledStatus;
@@ -62,6 +64,7 @@ class LoanServiceTest {
         copy = BookCopyEntity.builder().id(1L).code("COPY-001").status(CopyStatus.AVAILABLE).build();
         user = UserEntity.builder().id(1L).email("john@example.com").active(true).build();
 
+        requestedStatus  = LoanStatusEntity.builder().id(5L).name("REQUESTED").build();
         pendingStatus   = LoanStatusEntity.builder().id(1L).name("PENDING").build();
         returnedStatus  = LoanStatusEntity.builder().id(2L).name("RETURNED").build();
         cancelledStatus = LoanStatusEntity.builder().id(3L).name("CANCELLED").build();
@@ -73,6 +76,81 @@ class LoanServiceTest {
                 .renewalCount(0).build();
 
         request = new LoanRequest(1L, 1L, null, LocalDateTime.now().plusDays(14), null, null, null);
+    }
+
+    // ── requestLoan ──────────────────────────────────────────────────────────
+
+    @Test
+    void requestLoan_createsLoanInRequestedStatus_whenCopyAvailable() {
+        LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
+        when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
+        when(loanRepository.existsActiveRequestByUserAndCopy(1L, 1L)).thenReturn(false);
+        when(userService.findById(1L)).thenReturn(user);
+        when(loanStatusRepository.findByName("REQUESTED")).thenReturn(Optional.of(requestedStatus));
+        when(loanRepository.save(any(LoanEntity.class))).thenReturn(loan);
+
+        LoanEntity result = service.requestLoan(dto, 1L);
+
+        assertThat(result).isNotNull();
+        verify(bookCopyRepository, never()).save(any());
+    }
+
+    @Test
+    void requestLoan_throwsIllegalStateException_whenDuplicateActiveRequest() {
+        LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
+        when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
+        when(loanRepository.existsActiveRequestByUserAndCopy(1L, 1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.requestLoan(dto, 1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Ya tienes una solicitud activa");
+    }
+
+    @Test
+    void requestLoan_throwsIllegalStateException_whenCopyNotAvailable() {
+        copy.setStatus(CopyStatus.LOANED);
+        LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
+        when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
+
+        assertThatThrownBy(() -> service.requestLoan(dto, 1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("no está disponible para préstamo");
+    }
+
+    // ── approveLoan ──────────────────────────────────────────────────────────
+
+    @Test
+    void approveLoan_setsLoanedStatus_andMarksCopyAsLoaned() {
+        loan.setLoanStatus(requestedStatus);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanStatusRepository.findByName("PENDING")).thenReturn(Optional.of(pendingStatus));
+        when(loanRepository.save(loan)).thenReturn(loan);
+
+        LoanEntity result = service.approveLoan(1L, 99L);
+
+        assertThat(result.getLoanStatus().getName()).isEqualTo("PENDING");
+        assertThat(copy.getStatus()).isEqualTo(CopyStatus.LOANED);
+        verify(bookCopyRepository).save(copy);
+    }
+
+    @Test
+    void approveLoan_throwsIllegalStateException_whenNotInRequestedStatus() {
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan)); // loan está en PENDING
+
+        assertThatThrownBy(() -> service.approveLoan(1L, 99L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Solo se pueden aprobar solicitudes en estado SOLICITADO");
+    }
+
+    @Test
+    void approveLoan_throwsIllegalStateException_whenCopyNoLongerAvailable() {
+        loan.setLoanStatus(requestedStatus);
+        copy.setStatus(CopyStatus.LOANED);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        assertThatThrownBy(() -> service.approveLoan(1L, 99L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ya no está disponible");
     }
 
     // ── findAll ──────────────────────────────────────────────────────────────
@@ -265,6 +343,40 @@ class LoanServiceTest {
 
         assertThatThrownBy(() -> service.cancelLoan(1L))
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    // ── cancelLoanByStudent ──────────────────────────────────────────────────
+
+    @Test
+    void cancelLoanByStudent_cancelsSolicitud_whenOwnerAndRequested() {
+        loan.setLoanStatus(requestedStatus);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        when(loanStatusRepository.findByName("CANCELLED")).thenReturn(Optional.of(cancelledStatus));
+        when(loanRepository.save(loan)).thenReturn(loan);
+
+        LoanEntity result = service.cancelLoanByStudent(1L, 1L);
+
+        assertThat(result.getLoanStatus().getName()).isEqualTo("CANCELLED");
+        verify(bookCopyRepository, never()).save(any()); // no toca el ejemplar
+    }
+
+    @Test
+    void cancelLoanByStudent_throwsIllegalStateException_whenNotOwner() {
+        loan.setLoanStatus(requestedStatus);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        assertThatThrownBy(() -> service.cancelLoanByStudent(1L, 99L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No tienes permiso");
+    }
+
+    @Test
+    void cancelLoanByStudent_throwsIllegalStateException_whenNotRequested() {
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan)); // loan está en PENDING
+
+        assertThatThrownBy(() -> service.cancelLoanByStudent(1L, 1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Solo puedes cancelar solicitudes en estado SOLICITADO");
     }
 
     // ── delete ───────────────────────────────────────────────────────────────

@@ -118,7 +118,7 @@ CREATE TABLE users (
 -- -----------------------------------------------------------------------------
 -- TABLA: loan_status
 -- Catálogo de estados posibles para un préstamo.
--- Valores esperados: PENDING, RETURNED, CANCELLED, OVERDUE
+-- Valores esperados: REQUESTED, PENDING, RETURNED, CANCELLED, OVERDUE
 -- -----------------------------------------------------------------------------
 CREATE TABLE loan_status (
     id          BIGSERIAL    PRIMARY KEY,                          -- Identificador único del estado

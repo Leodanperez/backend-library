@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -21,6 +22,7 @@ public class UserController {
     private final UserUseCase useCase;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public PaginatedResponse<UserEntity> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) UserRole role,
@@ -31,11 +33,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public UserEntity findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody UserRequest dto) {
         UserEntity saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -45,24 +49,28 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest dto) {
         useCase.update(id, dto);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Usuario actualizado correctamente"));
     }
 
     @PatchMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> activate(@PathVariable Long id) {
         useCase.activate(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Usuario activado correctamente"));
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> deactivate(@PathVariable Long id) {
         useCase.deactivate(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Usuario desactivado correctamente"));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> delete(@PathVariable Long id) {
         useCase.delete(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Usuario eliminado correctamente"));

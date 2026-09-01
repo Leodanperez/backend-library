@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.LoanRequest;
+import dev.leo.library.application.dto.request.LoanRequestDto;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.exception.LoanNotFoundException;
 import dev.leo.library.domain.exception.LoanStatusNotFoundException;
@@ -52,6 +53,37 @@ public class LoanService implements LoanUseCase {
     @Override
     public LoanEntity findById(Long id) {
         return loanRepository.findById(id).orElseThrow(() -> new LoanNotFoundException(id));
+    }
+
+    @Override
+    @Transactional
+    public LoanEntity requestLoan(LoanRequestDto dto, Long studentId) {
+        BookCopyEntity copy = bookCopyRepository.findById(dto.bookCopyId())
+                .orElseThrow(() -> new BookCopyNotFoundException(dto.bookCopyId()));
+        if (copy.getStatus() != CopyStatus.AVAILABLE)
+            throw new IllegalStateException("El ejemplar no está disponible para préstamo");
+        if (loanRepository.existsActiveRequestByUserAndCopy(studentId, dto.bookCopyId()))
+            throw new IllegalStateException("Ya tienes una solicitud activa para este ejemplar");
+        return loanRepository.save(LoanEntity.builder()
+                .bookCopy(copy).user(userService.findById(studentId))
+                .loanStatus(getStatusByName("REQUESTED"))
+                .loanDate(LocalDateTime.now()).dueDate(dto.dueDate())
+                .renewalCount(0).observations(dto.observations()).build());
+    }
+
+    @Override
+    @Transactional
+    public LoanEntity approveLoan(Long id, Long librarianId) {
+        LoanEntity loan = findById(id);
+        if (!"REQUESTED".equals(loan.getLoanStatus().getName()))
+            throw new IllegalStateException("Solo se pueden aprobar solicitudes en estado SOLICITADO");
+        BookCopyEntity copy = loan.getBookCopy();
+        if (copy.getStatus() != CopyStatus.AVAILABLE)
+            throw new IllegalStateException("El ejemplar ya no está disponible");
+        loan.setLoanStatus(getStatusByName("PENDING"));
+        copy.setStatus(CopyStatus.LOANED);
+        bookCopyRepository.save(copy);
+        return loanRepository.save(loan);
     }
 
     @Override
@@ -119,6 +151,18 @@ public class LoanService implements LoanUseCase {
             copy.setStatus(CopyStatus.AVAILABLE);
             bookCopyRepository.save(copy);
         }
+        return loanRepository.save(loan);
+    }
+
+    @Override
+    @Transactional
+    public LoanEntity cancelLoanByStudent(Long id, Long studentId) {
+        LoanEntity loan = findById(id);
+        if (!loan.getUser().getId().equals(studentId))
+            throw new IllegalStateException("No tienes permiso para cancelar este préstamo");
+        if (!"REQUESTED".equals(loan.getLoanStatus().getName()))
+            throw new IllegalStateException("Solo puedes cancelar solicitudes en estado SOLICITADO");
+        loan.setLoanStatus(getStatusByName("CANCELLED"));
         return loanRepository.save(loan);
     }
 

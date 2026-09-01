@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,6 +23,7 @@ public class BookCopyController {
     private final BookCopyUseCase useCase;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public PaginatedResponse<BookCopyEntity> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long bookId,
@@ -33,11 +35,13 @@ public class BookCopyController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public BookCopyEntity findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody BookCopyRequest dto) {
         BookCopyEntity saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -47,18 +51,21 @@ public class BookCopyController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> update(@PathVariable Long id, @Valid @RequestBody BookCopyRequest dto) {
         useCase.update(id, dto);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Ejemplar actualizado correctamente"));
     }
 
     @PatchMapping("/{id}/lost")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> markAsLost(@PathVariable Long id) {
         useCase.markAsLost(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Ejemplar marcado como perdido"));
     }
 
     @PatchMapping("/{id}/damaged")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> markAsDamaged(
             @PathVariable Long id,
             @RequestParam(required = false) CopyCondition condition) {
@@ -67,12 +74,14 @@ public class BookCopyController {
     }
 
     @PatchMapping("/{id}/restore")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> restore(@PathVariable Long id) {
         useCase.restore(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Ejemplar restaurado y disponible"));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> delete(@PathVariable Long id) {
         useCase.delete(id);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Ejemplar eliminado correctamente"));

@@ -19,7 +19,9 @@ public class GlobalExceptionHandler {
         CategoryNotFoundException.class,
         LoanNotFoundException.class,
         UserNotFoundException.class,
-        LoanStatusNotFoundException.class
+        LoanStatusNotFoundException.class,
+        PublisherNotFoundException.class,
+        LocationNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(RuntimeException ex) {

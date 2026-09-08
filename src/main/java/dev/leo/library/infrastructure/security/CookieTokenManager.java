@@ -47,7 +47,7 @@ public class CookieTokenManager {
     private ResponseCookie buildCookie(String name, String value, long maxAgeMs) {
         String path = REFRESH_TOKEN.equals(name) ? "/api/v1/auth" : "/";
         return ResponseCookie.from(name, value)
-                .httpOnly(true).secure(secureCookie).sameSite("Strict")
+                .httpOnly(true).secure(secureCookie).sameSite("Lax")
                 .path(path).maxAge(Duration.ofMillis(maxAgeMs)).build();
     }
 }

@@ -35,6 +35,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserResponse> me(@AuthenticationPrincipal UserPrincipal principal) {
+        if (principal == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "No autenticado");
         return ResponseEntity.ok(UserResponse.from(principal.user()));
     }
 

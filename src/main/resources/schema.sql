@@ -151,3 +151,33 @@ CREATE TABLE loan (
 CREATE INDEX idx_loan_user_id        ON loan(user_id);         -- Índice para consultar préstamos por estudiante
 CREATE INDEX idx_loan_book_copy_id   ON loan(book_copy_id);    -- Índice para consultar préstamos por ejemplar
 CREATE INDEX idx_loan_loan_status_id ON loan(loan_status_id);  -- Índice para filtrar préstamos por estado
+
+-- -----------------------------------------------------------------------------
+-- TABLA: publishers
+-- Almacena las editoriales que publican los libros de la biblioteca.
+-- -----------------------------------------------------------------------------
+CREATE TABLE publishers (
+    id           BIGSERIAL    PRIMARY KEY,                          -- Identificador único de la editorial
+    name         VARCHAR(150) NOT NULL UNIQUE,                     -- Nombre de la editorial (ej: "Planeta", "Alfaguara")
+    country      VARCHAR(100),                                     -- País de origen de la editorial
+    founded_year INT,                                              -- Año de fundación de la editorial
+    website      VARCHAR(255),                                     -- Sitio web oficial de la editorial
+    active       BOOLEAN      NOT NULL DEFAULT TRUE,               -- Indica si la editorial está activa en el sistema
+    created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Fecha y hora de creación del registro
+    updated_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP   -- Fecha y hora de la última modificación
+);
+
+-- -----------------------------------------------------------------------------
+-- TABLA: locations
+-- Almacena las ubicaciones físicas dentro de la biblioteca (salas, pisos, secciones).
+-- -----------------------------------------------------------------------------
+CREATE TABLE locations (
+    id          BIGSERIAL    PRIMARY KEY,                          -- Identificador único de la ubicación
+    name        VARCHAR(150) NOT NULL UNIQUE,                     -- Nombre de la ubicación (ej: "Sala Principal", "Piso 2 - Sección B")
+    floor       INT,                                              -- Número de piso donde se encuentra la ubicación
+    capacity    INT,                                              -- Capacidad máxima de personas o ejemplares en la ubicación
+    description TEXT,                                             -- Descripción adicional de la ubicación
+    active      BOOLEAN      NOT NULL DEFAULT TRUE,               -- Indica si la ubicación está habilitada
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- Fecha y hora de creación del registro
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP   -- Fecha y hora de la última modificación
+);

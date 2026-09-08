@@ -6,6 +6,7 @@ import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopy
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 
 import java.util.List;
+import java.util.Set;
 
 public record BookDetailResponse(
         Long id,
@@ -20,6 +21,7 @@ public record BookDetailResponse(
         String authorFullName,
         String category,
         int availableCopies,
+        boolean available,
         List<CopyInfo> copies
 ) {
     public record CopyInfo(Long id, String code, CopyStatus status, CopyCondition condition, String location) {
@@ -28,9 +30,11 @@ public record BookDetailResponse(
         }
     }
 
-    public static BookDetailResponse from(BookEntity book, List<BookCopyEntity> copies) {
+    public static BookDetailResponse from(BookEntity book, List<BookCopyEntity> copies, Set<Long> requestedCopyIds) {
         List<CopyInfo> copyInfos = copies.stream().map(CopyInfo::from).toList();
-        long available = copies.stream().filter(c -> c.getStatus() == CopyStatus.AVAILABLE).count();
+        long available = copies.stream()
+                .filter(c -> c.getStatus() == CopyStatus.AVAILABLE && !requestedCopyIds.contains(c.getId()))
+                .count();
         return new BookDetailResponse(
                 book.getId(), book.getTitle(), book.getIsbn(), book.getDescription(),
                 book.getPublicationYear(), book.getPages(), book.getLanguage(),
@@ -38,6 +42,7 @@ public record BookDetailResponse(
                 book.getAuthor().getFirstName() + " " + book.getAuthor().getLastName(),
                 book.getCategory().getName(),
                 (int) available,
+                available > 0,
                 copyInfos
         );
     }

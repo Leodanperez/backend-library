@@ -2,6 +2,10 @@ package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.LoanRequest;
 import dev.leo.library.application.dto.request.LoanRequestDto;
+import dev.leo.library.application.dto.response.ActiveLoanResponse;
+import dev.leo.library.application.dto.response.LoanRequestSummaryResponse;
+import dev.leo.library.application.dto.response.MyLoanResponse;
+import dev.leo.library.application.dto.response.MyLoanSummaryResponse;
 import dev.leo.library.domain.port.input.LoanUseCase;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.LoanEntity;
 import dev.leo.library.infrastructure.security.UserPrincipal;
@@ -16,12 +20,33 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/loans")
 @RequiredArgsConstructor
 public class LoanController {
 
     private final LoanUseCase useCase;
+
+    @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public PaginatedResponse<ActiveLoanResponse> findActiveLoans(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int perPage) {
+        return useCase.findActiveLoans(q, page, perPage);
+    }
+
+    @GetMapping("/requests")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public LoanRequestSummaryResponse findRequests(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int perPage) {
+        return useCase.findRequests(status, q, page, perPage);
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
@@ -34,14 +59,31 @@ public class LoanController {
         return useCase.findAll(userId, bookCopyId, loanStatusId, page, perPage);
     }
 
+    @GetMapping("/my/summary")
+    @PreAuthorize("hasRole('STUDENT')")
+    public MyLoanSummaryResponse mySummary(@AuthenticationPrincipal UserPrincipal principal) {
+        return useCase.getSummary(principal.user().getId());
+    }
+
+    @GetMapping("/my/history")
+    @PreAuthorize("hasRole('STUDENT')")
+    public PaginatedResponse<MyLoanResponse> myHistory(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int perPage) {
+        return useCase.getHistory(principal.user().getId(), page, perPage);
+    }
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('STUDENT')")
-    public PaginatedResponse<LoanEntity> myLoans(
+    public PaginatedResponse<MyLoanResponse> myLoans(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) Long loanStatusId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage) {
-        return useCase.findAll(principal.user().getId(), null, loanStatusId, page, perPage);
+        PaginatedResponse<LoanEntity> loans = useCase.findAll(principal.user().getId(), null, loanStatusId, page, perPage);
+        List<MyLoanResponse> mapped = loans.data().stream().map(MyLoanResponse::from).toList();
+        return PaginatedResponse.of(mapped, loans.page(), loans.perPage(), loans.total());
     }
 
     @GetMapping("/{id}")
@@ -85,10 +127,14 @@ public class LoanController {
 
     @PatchMapping("/{id}/return")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public ResponseEntity<SuccessResponse> returnLoan(@PathVariable Long id) {
-        useCase.returnLoan(id);
+    public ResponseEntity<SuccessResponse> returnLoan(
+            @PathVariable Long id,
+            @RequestBody(required = false) ReturnRequest body) {
+        useCase.returnLoan(id, body != null ? body.observations() : null);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Préstamo devuelto correctamente"));
     }
+
+    record ReturnRequest(String observations) {}
 
     @PatchMapping("/{id}/renew")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")

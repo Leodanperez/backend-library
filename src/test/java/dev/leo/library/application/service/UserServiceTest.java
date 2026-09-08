@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.UserRequest;
+import dev.leo.library.application.dto.request.UserUpdateRequest;
 import dev.leo.library.domain.exception.UserNotFoundException;
 import dev.leo.library.domain.model.UserRole;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.UserEntity;
@@ -38,6 +39,7 @@ class UserServiceTest {
 
     private UserEntity user;
     private UserRequest request;
+    private UserUpdateRequest updateRequest;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +49,9 @@ class UserServiceTest {
 
         request = new UserRequest("John", "Doe", "john@example.com", "password123",
                 "555-1234", "123 Main St", null, UserRole.STUDENT, null);
+
+        updateRequest = new UserUpdateRequest("John", "Doe", "john@example.com",
+                null, null, null, UserRole.STUDENT, null);
     }
 
     @Test
@@ -135,7 +140,7 @@ class UserServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(user));
         when(repository.save(any(UserEntity.class))).thenReturn(user);
 
-        UserEntity result = service.update(1L, request);
+        UserEntity result = service.update(1L, updateRequest);
 
         assertThat(result).isNotNull();
         verify(repository).save(user);
@@ -143,7 +148,7 @@ class UserServiceTest {
 
     @Test
     void update_throwsIllegalStateException_whenNewEmailAlreadyTaken() {
-        UserRequest newEmail = new UserRequest("John", "Doe", "taken@example.com", "pass",
+        UserUpdateRequest newEmail = new UserUpdateRequest("John", "Doe", "taken@example.com",
                 null, null, null, null, null);
         when(repository.findById(1L)).thenReturn(Optional.of(user));
         when(repository.existsByEmail("taken@example.com")).thenReturn(true);

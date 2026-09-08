@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.AuthorRequest;
+import dev.leo.library.application.dto.response.AuthorSelectResponse;
 import dev.leo.library.domain.exception.AuthorNotFoundException;
 import dev.leo.library.domain.port.input.AuthorUseCase;
 import dev.leo.library.infrastructure.adapter.output.persistence.adapter.AuthorSpec;
@@ -14,11 +15,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuthorService implements AuthorUseCase {
 
     private final AuthorJpaRepository repository;
+
+    @Override
+    public List<AuthorSelectResponse> findAllForSelect() {
+        return repository.findByActiveTrue(Sort.by("lastName").ascending())
+                .stream().map(AuthorSelectResponse::from).toList();
+    }
 
     @Override
     public PaginatedResponse<AuthorEntity> findAll(String q, String nationality, Boolean active, int page, int perPage) {

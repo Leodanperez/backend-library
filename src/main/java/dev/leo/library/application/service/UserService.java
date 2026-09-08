@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.UserRequest;
+import dev.leo.library.application.dto.request.UserUpdateRequest;
 import dev.leo.library.domain.exception.UserNotFoundException;
 import dev.leo.library.domain.model.UserRole;
 import dev.leo.library.domain.port.input.UserUseCase;
@@ -57,7 +58,7 @@ public class UserService implements UserUseCase {
 
     @Override
     @Transactional
-    public UserEntity update(Long id, UserRequest dto) {
+    public UserEntity update(Long id, UserUpdateRequest dto) {
         UserEntity user = findById(id);
         if (!dto.email().equals(user.getEmail()) && repository.existsByEmail(dto.email()))
             throw new IllegalStateException("El correo electrónico ya está registrado: " + dto.email());

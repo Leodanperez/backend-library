@@ -13,9 +13,10 @@ public record BookCatalogResponse(
         String publisher,
         String coverUrl,
         String authorFullName,
-        String category
+        String category,
+        boolean available
 ) {
-    public static BookCatalogResponse from(BookEntity book) {
+    public static BookCatalogResponse from(BookEntity book, boolean available) {
         return new BookCatalogResponse(
                 book.getId(),
                 book.getTitle(),
@@ -27,7 +28,8 @@ public record BookCatalogResponse(
                 book.getPublisher(),
                 book.getCoverUrl(),
                 book.getAuthor().getFirstName() + " " + book.getAuthor().getLastName(),
-                book.getCategory().getName()
+                book.getCategory().getName(),
+                available
         );
     }
 }

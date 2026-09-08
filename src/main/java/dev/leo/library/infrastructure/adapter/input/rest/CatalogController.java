@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/catalog")
@@ -42,7 +43,10 @@ public class CatalogController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage) {
         PaginatedResponse<BookEntity> books = bookUseCase.findAll(q, authorId, categoryId, language, true, page, perPage);
-        List<BookCatalogResponse> mapped = books.data().stream().map(BookCatalogResponse::from).toList();
+        List<Long> ids = books.data().stream().map(BookEntity::getId).toList();
+        Set<Long> availableIds = ids.isEmpty() ? Set.of() : bookUseCase.findAvailableBookIds(ids);
+        List<BookCatalogResponse> mapped = books.data().stream()
+                .map(b -> BookCatalogResponse.from(b, availableIds.contains(b.getId()))).toList();
         return PaginatedResponse.of(mapped, books.page(), books.perPage(), books.total());
     }
 
@@ -51,7 +55,9 @@ public class CatalogController {
     public BookDetailResponse detail(@PathVariable Long id) {
         BookEntity book = bookUseCase.findById(id);
         List<BookCopyEntity> copies = bookCopyUseCase.findAll(null, id, null, null, 1, 100).data();
-        return BookDetailResponse.from(book, copies);
+        List<Long> copyIds = copies.stream().map(BookCopyEntity::getId).toList();
+        Set<Long> requestedIds = copyIds.isEmpty() ? Set.of() : new java.util.HashSet<>(loanUseCase.findRequestedCopyIds(copyIds));
+        return BookDetailResponse.from(book, copies, requestedIds);
     }
 
     // Solicitar préstamo de un ejemplar específico (solo estudiantes autenticados)

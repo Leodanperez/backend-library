@@ -1,6 +1,7 @@
 package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.UserRequest;
+import dev.leo.library.application.dto.request.UserUpdateRequest;
 import dev.leo.library.domain.model.UserRole;
 import dev.leo.library.domain.port.input.UserUseCase;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.UserEntity;
@@ -50,7 +51,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<SuccessResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest dto) {
+    public ResponseEntity<SuccessResponse> update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest dto) {
         useCase.update(id, dto);
         return ResponseEntity.ok(SuccessResponse.of(HttpStatus.OK.value(), "Usuario actualizado correctamente"));
     }

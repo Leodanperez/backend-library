@@ -14,6 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class BookService implements BookUseCase {
@@ -29,6 +32,11 @@ public class BookService implements BookUseCase {
                 PageRequest.of(page - 1, perPage, Sort.by("title").ascending())
         );
         return PaginatedResponse.of(result.getContent(), page, perPage, result.getTotalElements());
+    }
+
+    @Override
+    public Set<Long> findAvailableBookIds(List<Long> bookIds) {
+        return repository.findBookIdsWithAvailableCopies(bookIds);
     }
 
     @Override

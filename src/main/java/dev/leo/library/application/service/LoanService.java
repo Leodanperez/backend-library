@@ -2,6 +2,11 @@ package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.LoanRequest;
 import dev.leo.library.application.dto.request.LoanRequestDto;
+import dev.leo.library.application.dto.response.ActiveLoanResponse;
+import dev.leo.library.application.dto.response.LoanRequestSummaryResponse;
+import dev.leo.library.application.dto.response.LoanRequestItemResponse;
+import dev.leo.library.application.dto.response.MyLoanResponse;
+import dev.leo.library.application.dto.response.MyLoanSummaryResponse;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.exception.LoanNotFoundException;
 import dev.leo.library.domain.exception.LoanStatusNotFoundException;
@@ -22,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -39,6 +45,70 @@ public class LoanService implements LoanUseCase {
     private LoanStatusEntity getStatusByName(String name) {
         return loanStatusRepository.findByName(name)
                 .orElseThrow(() -> new LoanStatusNotFoundException(name));
+    }
+
+    @Override
+    public PaginatedResponse<ActiveLoanResponse> findActiveLoans(String q, int page, int perPage) {
+        Page<LoanEntity> result = loanRepository.findActiveLoans(
+                q, PageRequest.of(page - 1, perPage)
+        );
+        return PaginatedResponse.of(result.getContent().stream().map(ActiveLoanResponse::from).toList(),
+                page, perPage, result.getTotalElements());
+    }
+
+    @Override
+    public LoanRequestSummaryResponse findRequests(String status, String q, int page, int perPage) {
+        Page<LoanEntity> result = loanRepository.findRequests(
+                status, q,
+                PageRequest.of(page - 1, perPage)
+        );
+        List<LoanRequestItemResponse> items = result.getContent().stream().map(loan -> {
+            Long userId = loan.getUser().getId();
+            long activeLoans = loanRepository.countActiveByUserId(userId);
+            long overdueLoans = loanRepository.countOverdueByUserId(userId);
+            long available = loanRepository.countAvailableCopiesByBookId(loan.getBookCopy().getBook().getId());
+            return LoanRequestItemResponse.from(loan, (int) available, activeLoans, overdueLoans);
+        }).toList();
+        return new LoanRequestSummaryResponse(
+                loanRepository.countByStatus("REQUESTED"),
+                loanRepository.countByStatusToday("PENDING"),
+                loanRepository.countByStatusToday("CANCELLED"),
+                PaginatedResponse.of(items, page, perPage, result.getTotalElements())
+        );
+    }
+
+    @Override
+    public List<Long> findRequestedCopyIds(List<Long> copyIds) {
+        return loanRepository.findRequestedCopyIds(copyIds);
+    }
+
+    @Override
+    public MyLoanSummaryResponse getSummary(Long userId) {
+        int year = LocalDateTime.now().getYear();
+        List<MyLoanResponse> requests = loanRepository
+                .findByUserIdAndLoanStatus_NameIn(userId, List.of("REQUESTED", "CANCELLED"))
+                .stream().map(MyLoanResponse::from).toList();
+        List<MyLoanResponse> active = loanRepository
+                .findByUserIdAndLoanStatus_NameIn(userId, List.of("PENDING", "OVERDUE"))
+                .stream().map(MyLoanResponse::from).toList();
+        return new MyLoanSummaryResponse(
+                loanRepository.countByUserIdAndStatus(userId, "REQUESTED"),
+                loanRepository.countByUserIdAndStatus(userId, "PENDING"),
+                loanRepository.countRenewalsAvailable(userId),
+                loanRepository.countReturnedThisYear(userId, year),
+                requests,
+                active
+        );
+    }
+
+    @Override
+    public PaginatedResponse<MyLoanResponse> getHistory(Long userId, int page, int perPage) {
+        Page<LoanEntity> result = loanRepository.findByUserIdAndLoanStatus_Name(
+                userId, "RETURNED",
+                PageRequest.of(page - 1, perPage, Sort.by("returnDate").descending())
+        );
+        return PaginatedResponse.of(result.getContent().stream().map(MyLoanResponse::from).toList(),
+                page, perPage, result.getTotalElements());
     }
 
     @Override
@@ -62,8 +132,8 @@ public class LoanService implements LoanUseCase {
                 .orElseThrow(() -> new BookCopyNotFoundException(dto.bookCopyId()));
         if (copy.getStatus() != CopyStatus.AVAILABLE)
             throw new IllegalStateException("El ejemplar no está disponible para préstamo");
-        if (loanRepository.existsActiveRequestByUserAndCopy(studentId, dto.bookCopyId()))
-            throw new IllegalStateException("Ya tienes una solicitud activa para este ejemplar");
+        if (loanRepository.existsActiveRequestByUserAndBook(studentId, copy.getBook().getId()))
+            throw new IllegalStateException("Ya tienes una solicitud activa para este libro");
         return loanRepository.save(LoanEntity.builder()
                 .bookCopy(copy).user(userService.findById(studentId))
                 .loanStatus(getStatusByName("REQUESTED"))
@@ -108,7 +178,7 @@ public class LoanService implements LoanUseCase {
 
     @Override
     @Transactional
-    public LoanEntity returnLoan(Long id) {
+    public LoanEntity returnLoan(Long id, String observations) {
         LoanEntity loan = findById(id);
         if ("RETURNED".equals(loan.getLoanStatus().getName()))
             throw new IllegalStateException("El préstamo ya fue devuelto");
@@ -116,6 +186,7 @@ public class LoanService implements LoanUseCase {
             throw new IllegalStateException("No se puede devolver un préstamo cancelado");
         loan.setLoanStatus(getStatusByName("RETURNED"));
         loan.setReturnDate(LocalDateTime.now());
+        if (observations != null) loan.setObservations(observations);
         BookCopyEntity copy = loan.getBookCopy();
         copy.setStatus(CopyStatus.AVAILABLE);
         bookCopyRepository.save(copy);

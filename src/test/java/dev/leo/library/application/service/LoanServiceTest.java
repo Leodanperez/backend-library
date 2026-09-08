@@ -6,6 +6,7 @@ import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.exception.LoanNotFoundException;
 import dev.leo.library.domain.model.CopyStatus;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopyEntity;
+import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.LoanEntity;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.LoanStatusEntity;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.UserEntity;
@@ -61,7 +62,8 @@ class LoanServiceTest {
 
     @BeforeEach
     void setUp() {
-        copy = BookCopyEntity.builder().id(1L).code("COPY-001").status(CopyStatus.AVAILABLE).build();
+        BookEntity book = BookEntity.builder().id(10L).build();
+        copy = BookCopyEntity.builder().id(1L).code("COPY-001").status(CopyStatus.AVAILABLE).book(book).build();
         user = UserEntity.builder().id(1L).email("john@example.com").active(true).build();
 
         requestedStatus  = LoanStatusEntity.builder().id(5L).name("REQUESTED").build();
@@ -84,7 +86,7 @@ class LoanServiceTest {
     void requestLoan_createsLoanInRequestedStatus_whenCopyAvailable() {
         LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
         when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
-        when(loanRepository.existsActiveRequestByUserAndCopy(1L, 1L)).thenReturn(false);
+        when(loanRepository.existsActiveRequestByUserAndBook(1L, any())).thenReturn(false);
         when(userService.findById(1L)).thenReturn(user);
         when(loanStatusRepository.findByName("REQUESTED")).thenReturn(Optional.of(requestedStatus));
         when(loanRepository.save(any(LoanEntity.class))).thenReturn(loan);
@@ -99,7 +101,7 @@ class LoanServiceTest {
     void requestLoan_throwsIllegalStateException_whenDuplicateActiveRequest() {
         LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
         when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
-        when(loanRepository.existsActiveRequestByUserAndCopy(1L, 1L)).thenReturn(true);
+        when(loanRepository.existsActiveRequestByUserAndBook(anyLong(), anyLong())).thenReturn(true);
 
         assertThatThrownBy(() -> service.requestLoan(dto, 1L))
                 .isInstanceOf(IllegalStateException.class)
@@ -228,7 +230,7 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("RETURNED")).thenReturn(Optional.of(returnedStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.returnLoan(1L);
+        LoanEntity result = service.returnLoan(1L, null);
 
         assertThat(result.getLoanStatus().getName()).isEqualTo("RETURNED");
         assertThat(result.getReturnDate()).isNotNull();
@@ -241,7 +243,7 @@ class LoanServiceTest {
         loan.setLoanStatus(returnedStatus);
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
-        assertThatThrownBy(() -> service.returnLoan(1L))
+        assertThatThrownBy(() -> service.returnLoan(1L, null))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ya fue devuelto");
     }
@@ -251,7 +253,7 @@ class LoanServiceTest {
         loan.setLoanStatus(cancelledStatus);
         when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
-        assertThatThrownBy(() -> service.returnLoan(1L))
+        assertThatThrownBy(() -> service.returnLoan(1L, null))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("No se puede devolver un préstamo cancelado");
     }

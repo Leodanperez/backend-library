@@ -1,6 +1,7 @@
 package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.AuthorRequest;
+import dev.leo.library.application.dto.response.AuthorSelectResponse;
 import dev.leo.library.domain.port.input.AuthorUseCase;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.AuthorEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
@@ -13,12 +14,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/authors")
 @RequiredArgsConstructor
 public class AuthorController {
 
     private final AuthorUseCase useCase;
+
+    @GetMapping("/select")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public List<AuthorSelectResponse> findAllForSelect() {
+        return useCase.findAllForSelect();
+    }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")

@@ -4,8 +4,12 @@ import dev.leo.library.application.dto.request.BookRequest;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 
+import java.util.List;
+import java.util.Set;
+
 public interface BookUseCase {
     PaginatedResponse<BookEntity> findAll(String q, Long authorId, Long categoryId, String language, Boolean active, int page, int perPage);
+    Set<Long> findAvailableBookIds(List<Long> bookIds);
     BookEntity findById(Long id);
     BookEntity save(BookRequest dto);
     BookEntity update(Long id, BookRequest dto);

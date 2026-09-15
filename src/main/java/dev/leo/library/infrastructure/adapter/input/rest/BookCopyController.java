@@ -1,10 +1,10 @@
 package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.BookCopyRequest;
+import dev.leo.library.application.dto.response.BookCopyResponse;
 import dev.leo.library.domain.model.CopyCondition;
 import dev.leo.library.domain.model.CopyStatus;
 import dev.leo.library.domain.port.input.BookCopyUseCase;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopyEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import dev.leo.library.shared.dto.SuccessResponse;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ public class BookCopyController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public PaginatedResponse<BookCopyEntity> findAll(
+    public PaginatedResponse<BookCopyResponse> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long bookId,
             @RequestParam(required = false) CopyStatus status,
@@ -36,16 +36,16 @@ public class BookCopyController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public BookCopyEntity findById(@PathVariable Long id) {
+    public BookCopyResponse findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody BookCopyRequest dto) {
-        BookCopyEntity saved = useCase.save(dto);
+        BookCopyResponse saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(saved.getId()).toUri();
+                .path("/{id}").buildAndExpand(saved.id()).toUri();
         return ResponseEntity.created(location)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Ejemplar creado correctamente"));
     }

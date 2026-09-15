@@ -65,6 +65,18 @@ public interface LoanJpaRepository extends JpaRepository<LoanEntity, Long>, JpaS
     Page<LoanEntity> findActiveLoans(@Param("q") String q, Pageable pageable);
 
     @Query("""
+        SELECT l FROM LoanEntity l
+        WHERE (:userId IS NULL OR l.user.id = :userId)
+          AND (:bookCopyId IS NULL OR l.bookCopy.id = :bookCopyId)
+          AND (:status IS NULL OR l.loanStatus.name = :status)
+          AND (:q IS NULL OR LOWER(l.bookCopy.book.title) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+               OR LOWER(l.user.firstName) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%'))
+               OR LOWER(l.user.lastName) LIKE LOWER(CONCAT('%', CAST(:q AS string), '%')))
+        """)
+    Page<LoanEntity> findAllLoans(@Param("userId") Long userId, @Param("bookCopyId") Long bookCopyId,
+                                  @Param("status") String status, @Param("q") String q, Pageable pageable);
+
+    @Query("""
         SELECT l.bookCopy.id FROM LoanEntity l
         WHERE l.bookCopy.id IN :copyIds
           AND l.loanStatus.name = 'REQUESTED'

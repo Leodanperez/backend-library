@@ -1,6 +1,7 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.BookCopyRequest;
+import dev.leo.library.application.dto.response.BookCopyResponse;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.model.CopyCondition;
 import dev.leo.library.domain.model.CopyStatus;
@@ -28,14 +29,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BookCopyServiceTest {
 
-    @Mock
-    private BookCopyJpaRepository repository;
-
-    @Mock
-    private BookService bookService;
-
-    @InjectMocks
-    private BookCopyService service;
+    @Mock private BookCopyJpaRepository repository;
+    @Mock private BookService bookService;
+    @InjectMocks private BookCopyService service;
 
     private BookCopyEntity copy;
     private BookCopyRequest request;
@@ -55,19 +51,29 @@ class BookCopyServiceTest {
         when(repository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(copy)));
 
-        PaginatedResponse<BookCopyEntity> result = service.findAll(null, null, null, null, 1, 10);
+        PaginatedResponse<BookCopyResponse> result = service.findAll(null, null, null, null, 1, 10);
 
         assertThat(result.data()).hasSize(1);
         assertThat(result.total()).isEqualTo(1);
     }
 
     @Test
-    void findById_returnsCopy_whenExists() {
+    void findEntityById_returnsCopy_whenExists() {
         when(repository.findById(1L)).thenReturn(Optional.of(copy));
 
-        BookCopyEntity result = service.findById(1L);
+        BookCopyEntity result = service.findEntityById(1L);
 
         assertThat(result.getCode()).isEqualTo("COPY-001");
+    }
+
+    @Test
+    void findById_returnsBookCopyResponse_whenExists() {
+        when(repository.findById(1L)).thenReturn(Optional.of(copy));
+
+        BookCopyResponse result = service.findById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.code()).isEqualTo("COPY-001");
     }
 
     @Test
@@ -81,12 +87,12 @@ class BookCopyServiceTest {
     @Test
     void save_createsCopy_whenCodeNotDuplicated() {
         when(repository.existsByCode("COPY-001")).thenReturn(false);
-        when(bookService.findById(1L)).thenReturn(book);
+        when(bookService.findEntityById(1L)).thenReturn(book);
         when(repository.save(any(BookCopyEntity.class))).thenReturn(copy);
 
-        BookCopyEntity result = service.save(request);
+        BookCopyResponse result = service.save(request);
 
-        assertThat(result.getCode()).isEqualTo("COPY-001");
+        assertThat(result.code()).isEqualTo("COPY-001");
         verify(repository).save(any(BookCopyEntity.class));
     }
 
@@ -103,12 +109,12 @@ class BookCopyServiceTest {
     void save_defaultsStatusToAvailable_whenStatusIsNull() {
         BookCopyRequest noStatus = new BookCopyRequest(1L, "COPY-002", null, CopyCondition.GOOD, null, null, null);
         when(repository.existsByCode("COPY-002")).thenReturn(false);
-        when(bookService.findById(1L)).thenReturn(book);
+        when(bookService.findEntityById(1L)).thenReturn(book);
         when(repository.save(any(BookCopyEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        BookCopyEntity result = service.save(noStatus);
+        BookCopyResponse result = service.save(noStatus);
 
-        assertThat(result.getStatus()).isEqualTo(CopyStatus.AVAILABLE);
+        assertThat(result.status()).isEqualTo(CopyStatus.AVAILABLE);
     }
 
     @Test
@@ -116,9 +122,8 @@ class BookCopyServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(copy));
         when(repository.save(any(BookCopyEntity.class))).thenReturn(copy);
 
-        BookCopyEntity result = service.update(1L, request);
+        service.update(1L, request);
 
-        assertThat(result).isNotNull();
         verify(repository).save(copy);
     }
 
@@ -138,9 +143,9 @@ class BookCopyServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(copy));
         when(repository.save(copy)).thenReturn(copy);
 
-        BookCopyEntity result = service.markAsLost(1L);
+        service.markAsLost(1L);
 
-        assertThat(result.getStatus()).isEqualTo(CopyStatus.LOST);
+        assertThat(copy.getStatus()).isEqualTo(CopyStatus.LOST);
     }
 
     @Test
@@ -158,10 +163,10 @@ class BookCopyServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(copy));
         when(repository.save(copy)).thenReturn(copy);
 
-        BookCopyEntity result = service.markAsDamaged(1L, CopyCondition.DAMAGED);
+        service.markAsDamaged(1L, CopyCondition.DAMAGED);
 
-        assertThat(result.getStatus()).isEqualTo(CopyStatus.DAMAGED);
-        assertThat(result.getCondition()).isEqualTo(CopyCondition.DAMAGED);
+        assertThat(copy.getStatus()).isEqualTo(CopyStatus.DAMAGED);
+        assertThat(copy.getCondition()).isEqualTo(CopyCondition.DAMAGED);
     }
 
     @Test
@@ -180,10 +185,10 @@ class BookCopyServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(copy));
         when(repository.save(copy)).thenReturn(copy);
 
-        BookCopyEntity result = service.restore(1L);
+        service.restore(1L);
 
-        assertThat(result.getStatus()).isEqualTo(CopyStatus.AVAILABLE);
-        assertThat(result.getCondition()).isEqualTo(CopyCondition.FAIR);
+        assertThat(copy.getStatus()).isEqualTo(CopyStatus.AVAILABLE);
+        assertThat(copy.getCondition()).isEqualTo(CopyCondition.FAIR);
     }
 
     @Test

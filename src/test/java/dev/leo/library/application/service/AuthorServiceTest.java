@@ -1,9 +1,12 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.AuthorRequest;
+import dev.leo.library.application.dto.response.AuthorResponse;
+import dev.leo.library.application.dto.response.SelectOptionsResponse.SelectItem;
 import dev.leo.library.domain.exception.AuthorNotFoundException;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.AuthorEntity;
 import dev.leo.library.infrastructure.adapter.output.persistence.repository.AuthorJpaRepository;
+import dev.leo.library.infrastructure.adapter.output.persistence.repository.BookJpaRepository;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +29,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthorServiceTest {
 
-    @Mock
-    private AuthorJpaRepository repository;
-
-    @InjectMocks
-    private AuthorService service;
+    @Mock private AuthorJpaRepository repository;
+    @Mock private BookJpaRepository bookRepository;
+    @InjectMocks private AuthorService service;
 
     private AuthorEntity author;
     private AuthorRequest request;
@@ -40,7 +41,6 @@ class AuthorServiceTest {
         author = AuthorEntity.builder()
                 .id(1L).firstName("Gabriel").lastName("García Márquez")
                 .nationality("Colombian").email("gabriel@example.com").active(true).build();
-
         request = new AuthorRequest("Gabriel", "García Márquez", null,
                 LocalDate.of(1927, 3, 6), "Colombian", "Nobel Prize author", "gabriel@example.com");
     }
@@ -49,21 +49,32 @@ class AuthorServiceTest {
     void findAll_returnsPagedResponse() {
         when(repository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(author)));
+        when(bookRepository.countActiveByAuthorId(1L)).thenReturn(3L);
 
-        PaginatedResponse<AuthorEntity> result = service.findAll(null, null, null, 1, 10);
+        PaginatedResponse<AuthorResponse> result = service.findAll(null, null, null, 1, 10);
 
         assertThat(result.data()).hasSize(1);
-        assertThat(result.total()).isEqualTo(1);
+        assertThat(result.data().get(0).bookCount()).isEqualTo(3);
     }
 
     @Test
-    void findById_returnsAuthor_whenExists() {
+    void findEntityById_returnsAuthor_whenExists() {
         when(repository.findById(1L)).thenReturn(Optional.of(author));
 
-        AuthorEntity result = service.findById(1L);
+        AuthorEntity result = service.findEntityById(1L);
 
         assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getFirstName()).isEqualTo("Gabriel");
+    }
+
+    @Test
+    void findById_returnsAuthorResponse_whenExists() {
+        when(repository.findById(1L)).thenReturn(Optional.of(author));
+        when(bookRepository.countActiveByAuthorId(1L)).thenReturn(0L);
+
+        AuthorResponse result = service.findById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.firstName()).isEqualTo("Gabriel");
     }
 
     @Test
@@ -79,9 +90,9 @@ class AuthorServiceTest {
         when(repository.existsByEmail(request.email())).thenReturn(false);
         when(repository.save(any(AuthorEntity.class))).thenReturn(author);
 
-        AuthorEntity result = service.save(request);
+        AuthorResponse result = service.save(request);
 
-        assertThat(result.getFirstName()).isEqualTo("Gabriel");
+        assertThat(result.firstName()).isEqualTo("Gabriel");
         verify(repository).save(any(AuthorEntity.class));
     }
 
@@ -100,9 +111,9 @@ class AuthorServiceTest {
         AuthorEntity saved = AuthorEntity.builder().id(2L).firstName("Ana").lastName("Rojas").active(true).build();
         when(repository.save(any(AuthorEntity.class))).thenReturn(saved);
 
-        AuthorEntity result = service.save(noEmail);
+        AuthorResponse result = service.save(noEmail);
 
-        assertThat(result.getFirstName()).isEqualTo("Ana");
+        assertThat(result.firstName()).isEqualTo("Ana");
         verify(repository, never()).existsByEmail(any());
     }
 
@@ -111,9 +122,8 @@ class AuthorServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(author));
         when(repository.save(any(AuthorEntity.class))).thenReturn(author);
 
-        AuthorEntity result = service.update(1L, request);
+        service.update(1L, request);
 
-        assertThat(result).isNotNull();
         verify(repository).save(author);
     }
 
@@ -135,9 +145,9 @@ class AuthorServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(author));
         when(repository.save(author)).thenReturn(author);
 
-        AuthorEntity result = service.activate(1L);
+        service.activate(1L);
 
-        assertThat(result.isActive()).isTrue();
+        assertThat(author.isActive()).isTrue();
     }
 
     @Test
@@ -145,9 +155,9 @@ class AuthorServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(author));
         when(repository.save(author)).thenReturn(author);
 
-        AuthorEntity result = service.deactivate(1L);
+        service.deactivate(1L);
 
-        assertThat(result.isActive()).isFalse();
+        assertThat(author.isActive()).isFalse();
     }
 
     @Test

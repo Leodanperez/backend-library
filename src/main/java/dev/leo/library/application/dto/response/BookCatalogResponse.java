@@ -1,6 +1,6 @@
 package dev.leo.library.application.dto.response;
 
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
+import dev.leo.library.application.dto.response.BookResponse;
 
 public record BookCatalogResponse(
         Long id,
@@ -16,19 +16,13 @@ public record BookCatalogResponse(
         String category,
         boolean available
 ) {
-    public static BookCatalogResponse from(BookEntity book, boolean available) {
+    public static BookCatalogResponse from(BookResponse book, boolean available) {
         return new BookCatalogResponse(
-                book.getId(),
-                book.getTitle(),
-                book.getIsbn(),
-                book.getDescription(),
-                book.getPublicationYear(),
-                book.getPages(),
-                book.getLanguage(),
-                book.getPublisher(),
-                book.getCoverUrl(),
-                book.getAuthor().getFirstName() + " " + book.getAuthor().getLastName(),
-                book.getCategory().getName(),
+                book.id(), book.title(), book.isbn(), book.description(),
+                book.publicationYear(), book.pages(), book.language(),
+                book.publisher(), book.coverUrl(),
+                book.authorName(),
+                book.categoryName(),
                 available
         );
     }

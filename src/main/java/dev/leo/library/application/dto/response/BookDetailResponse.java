@@ -1,9 +1,9 @@
 package dev.leo.library.application.dto.response;
 
+import dev.leo.library.application.dto.response.BookCopyResponse;
+import dev.leo.library.application.dto.response.BookResponse;
 import dev.leo.library.domain.model.CopyCondition;
 import dev.leo.library.domain.model.CopyStatus;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopyEntity;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -25,22 +25,22 @@ public record BookDetailResponse(
         List<CopyInfo> copies
 ) {
     public record CopyInfo(Long id, String code, CopyStatus status, CopyCondition condition, String location) {
-        public static CopyInfo from(BookCopyEntity copy) {
-            return new CopyInfo(copy.getId(), copy.getCode(), copy.getStatus(), copy.getCondition(), copy.getLocation());
+        public static CopyInfo from(BookCopyResponse copy) {
+            return new CopyInfo(copy.id(), copy.code(), copy.status(), copy.condition(), copy.location());
         }
     }
 
-    public static BookDetailResponse from(BookEntity book, List<BookCopyEntity> copies, Set<Long> requestedCopyIds) {
+    public static BookDetailResponse from(BookResponse book, List<BookCopyResponse> copies, Set<Long> requestedCopyIds) {
         List<CopyInfo> copyInfos = copies.stream().map(CopyInfo::from).toList();
         long available = copies.stream()
-                .filter(c -> c.getStatus() == CopyStatus.AVAILABLE && !requestedCopyIds.contains(c.getId()))
+                .filter(c -> c.status() == CopyStatus.AVAILABLE && !requestedCopyIds.contains(c.id()))
                 .count();
         return new BookDetailResponse(
-                book.getId(), book.getTitle(), book.getIsbn(), book.getDescription(),
-                book.getPublicationYear(), book.getPages(), book.getLanguage(),
-                book.getPublisher(), book.getCoverUrl(),
-                book.getAuthor().getFirstName() + " " + book.getAuthor().getLastName(),
-                book.getCategory().getName(),
+                book.id(), book.title(), book.isbn(), book.description(),
+                book.publicationYear(), book.pages(), book.language(),
+                book.publisher(), book.coverUrl(),
+                book.authorName(),
+                book.categoryName(),
                 (int) available,
                 available > 0,
                 copyInfos

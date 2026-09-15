@@ -2,6 +2,7 @@ package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.LoanRequest;
 import dev.leo.library.application.dto.request.LoanRequestDto;
+import dev.leo.library.application.dto.response.LoanSummaryResponse;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
 import dev.leo.library.domain.exception.LoanNotFoundException;
 import dev.leo.library.domain.model.CopyStatus;
@@ -22,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,28 +35,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LoanServiceTest {
 
-    @Mock
-    private LoanJpaRepository loanRepository;
-
-    @Mock
-    private BookCopyJpaRepository bookCopyRepository;
-
-    @Mock
-    private LoanStatusJpaRepository loanStatusRepository;
-
-    @Mock
-    private UserService userService;
-
-    @InjectMocks
-    private LoanService service;
+    @Mock private LoanJpaRepository loanRepository;
+    @Mock private BookCopyJpaRepository bookCopyRepository;
+    @Mock private LoanStatusJpaRepository loanStatusRepository;
+    @Mock private UserService userService;
+    @InjectMocks private LoanService service;
 
     private BookCopyEntity copy;
     private UserEntity user;
-    private LoanStatusEntity requestedStatus;
-    private LoanStatusEntity pendingStatus;
-    private LoanStatusEntity returnedStatus;
-    private LoanStatusEntity cancelledStatus;
-    private LoanStatusEntity overdueStatus;
+    private LoanStatusEntity requestedStatus, pendingStatus, returnedStatus, cancelledStatus, overdueStatus;
     private LoanEntity loan;
     private LoanRequest request;
 
@@ -67,10 +54,10 @@ class LoanServiceTest {
         user = UserEntity.builder().id(1L).email("john@example.com").active(true).build();
 
         requestedStatus  = LoanStatusEntity.builder().id(5L).name("REQUESTED").build();
-        pendingStatus   = LoanStatusEntity.builder().id(1L).name("PENDING").build();
-        returnedStatus  = LoanStatusEntity.builder().id(2L).name("RETURNED").build();
-        cancelledStatus = LoanStatusEntity.builder().id(3L).name("CANCELLED").build();
-        overdueStatus   = LoanStatusEntity.builder().id(4L).name("OVERDUE").build();
+        pendingStatus    = LoanStatusEntity.builder().id(1L).name("PENDING").build();
+        returnedStatus   = LoanStatusEntity.builder().id(2L).name("RETURNED").build();
+        cancelledStatus  = LoanStatusEntity.builder().id(3L).name("CANCELLED").build();
+        overdueStatus    = LoanStatusEntity.builder().id(4L).name("OVERDUE").build();
 
         loan = LoanEntity.builder()
                 .id(1L).bookCopy(copy).user(user).loanStatus(pendingStatus)
@@ -80,20 +67,61 @@ class LoanServiceTest {
         request = new LoanRequest(1L, 1L, null, LocalDateTime.now().plusDays(14), null, null, null);
     }
 
+    // ── findAll ──────────────────────────────────────────────────────────────
+
+    @Test
+    void findAll_returnsPagedResponse() {
+        when(loanRepository.findAllLoans(isNull(), isNull(), isNull(), isNull(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(loan)));
+
+        PaginatedResponse<LoanSummaryResponse> result = service.findAll(null, null, null, null, 1, 10);
+
+        assertThat(result.data()).hasSize(1);
+        assertThat(result.total()).isEqualTo(1);
+    }
+
+    // ── findById ─────────────────────────────────────────────────────────────
+
+    @Test
+    void findEntityById_returnsLoan_whenExists() {
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        LoanEntity result = service.findEntityById(1L);
+
+        assertThat(result.getId()).isEqualTo(1L);
+    }
+
+    @Test
+    void findById_returnsLoanSummaryResponse_whenExists() {
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+
+        LoanSummaryResponse result = service.findById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+    }
+
+    @Test
+    void findById_throwsLoanNotFoundException_whenNotFound() {
+        when(loanRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findById(99L))
+                .isInstanceOf(LoanNotFoundException.class);
+    }
+
     // ── requestLoan ──────────────────────────────────────────────────────────
 
     @Test
-    void requestLoan_createsLoanInRequestedStatus_whenCopyAvailable() {
+    void requestLoan_createsLoan_whenCopyAvailable() {
         LoanRequestDto dto = new LoanRequestDto(1L, LocalDateTime.now().plusDays(14), null);
         when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
-        when(loanRepository.existsActiveRequestByUserAndBook(1L, any())).thenReturn(false);
-        when(userService.findById(1L)).thenReturn(user);
+        when(loanRepository.existsActiveRequestByUserAndBook(anyLong(), anyLong())).thenReturn(false);
+        when(userService.findEntityById(1L)).thenReturn(user);
         when(loanStatusRepository.findByName("REQUESTED")).thenReturn(Optional.of(requestedStatus));
         when(loanRepository.save(any(LoanEntity.class))).thenReturn(loan);
 
-        LoanEntity result = service.requestLoan(dto, 1L);
+        service.requestLoan(dto, 1L);
 
-        assertThat(result).isNotNull();
+        verify(loanRepository).save(any(LoanEntity.class));
         verify(bookCopyRepository, never()).save(any());
     }
 
@@ -128,16 +156,16 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("PENDING")).thenReturn(Optional.of(pendingStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.approveLoan(1L, 99L);
+        service.approveLoan(1L, 99L);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("PENDING");
+        assertThat(loan.getLoanStatus().getName()).isEqualTo("PENDING");
         assertThat(copy.getStatus()).isEqualTo(CopyStatus.LOANED);
         verify(bookCopyRepository).save(copy);
     }
 
     @Test
     void approveLoan_throwsIllegalStateException_whenNotInRequestedStatus() {
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan)); // loan está en PENDING
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
         assertThatThrownBy(() -> service.approveLoan(1L, 99L))
                 .isInstanceOf(IllegalStateException.class)
@@ -155,50 +183,17 @@ class LoanServiceTest {
                 .hasMessageContaining("ya no está disponible");
     }
 
-    // ── findAll ──────────────────────────────────────────────────────────────
-
-    @Test
-    void findAll_returnsPagedResponse() {
-        when(loanRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(loan)));
-
-        PaginatedResponse<LoanEntity> result = service.findAll(null, null, null, 1, 10);
-
-        assertThat(result.data()).hasSize(1);
-        assertThat(result.total()).isEqualTo(1);
-    }
-
-    // ── findById ─────────────────────────────────────────────────────────────
-
-    @Test
-    void findById_returnsLoan_whenExists() {
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
-
-        LoanEntity result = service.findById(1L);
-
-        assertThat(result.getId()).isEqualTo(1L);
-    }
-
-    @Test
-    void findById_throwsLoanNotFoundException_whenNotFound() {
-        when(loanRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.findById(99L))
-                .isInstanceOf(LoanNotFoundException.class);
-    }
-
     // ── save ─────────────────────────────────────────────────────────────────
 
     @Test
     void save_createsLoan_whenCopyIsAvailable() {
         when(bookCopyRepository.findById(1L)).thenReturn(Optional.of(copy));
-        when(userService.findById(1L)).thenReturn(user);
+        when(userService.findEntityById(1L)).thenReturn(user);
         when(loanStatusRepository.findByName("PENDING")).thenReturn(Optional.of(pendingStatus));
         when(loanRepository.save(any(LoanEntity.class))).thenReturn(loan);
 
-        LoanEntity result = service.save(request);
+        service.save(request);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("PENDING");
         verify(bookCopyRepository).save(copy);
         assertThat(copy.getStatus()).isEqualTo(CopyStatus.LOANED);
     }
@@ -230,10 +225,10 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("RETURNED")).thenReturn(Optional.of(returnedStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.returnLoan(1L, null);
+        service.returnLoan(1L, null);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("RETURNED");
-        assertThat(result.getReturnDate()).isNotNull();
+        assertThat(loan.getLoanStatus().getName()).isEqualTo("RETURNED");
+        assertThat(loan.getReturnDate()).isNotNull();
         assertThat(copy.getStatus()).isEqualTo(CopyStatus.AVAILABLE);
         verify(bookCopyRepository).save(copy);
     }
@@ -266,10 +261,10 @@ class LoanServiceTest {
         when(loanRepository.save(loan)).thenReturn(loan);
         LocalDateTime originalDue = loan.getDueDate();
 
-        LoanEntity result = service.renewLoan(1L, 7);
+        service.renewLoan(1L, 7);
 
-        assertThat(result.getDueDate()).isEqualTo(originalDue.plusDays(7));
-        assertThat(result.getRenewalCount()).isEqualTo(1);
+        assertThat(loan.getDueDate()).isEqualTo(originalDue.plusDays(7));
+        assertThat(loan.getRenewalCount()).isEqualTo(1);
     }
 
     @Test
@@ -279,9 +274,9 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("PENDING")).thenReturn(Optional.of(pendingStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.renewLoan(1L, 7);
+        service.renewLoan(1L, 7);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("PENDING");
+        assertThat(loan.getLoanStatus().getName()).isEqualTo("PENDING");
     }
 
     @Test
@@ -321,9 +316,9 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("CANCELLED")).thenReturn(Optional.of(cancelledStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.cancelLoan(1L);
+        service.cancelLoan(1L);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("CANCELLED");
+        assertThat(loan.getLoanStatus().getName()).isEqualTo("CANCELLED");
         assertThat(copy.getStatus()).isEqualTo(CopyStatus.AVAILABLE);
         verify(bookCopyRepository).save(copy);
     }
@@ -356,10 +351,10 @@ class LoanServiceTest {
         when(loanStatusRepository.findByName("CANCELLED")).thenReturn(Optional.of(cancelledStatus));
         when(loanRepository.save(loan)).thenReturn(loan);
 
-        LoanEntity result = service.cancelLoanByStudent(1L, 1L);
+        service.cancelLoanByStudent(1L, 1L);
 
-        assertThat(result.getLoanStatus().getName()).isEqualTo("CANCELLED");
-        verify(bookCopyRepository, never()).save(any()); // no toca el ejemplar
+        assertThat(loan.getLoanStatus().getName()).isEqualTo("CANCELLED");
+        verify(bookCopyRepository, never()).save(any());
     }
 
     @Test
@@ -374,7 +369,7 @@ class LoanServiceTest {
 
     @Test
     void cancelLoanByStudent_throwsIllegalStateException_whenNotRequested() {
-        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan)); // loan está en PENDING
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
 
         assertThatThrownBy(() -> service.cancelLoanByStudent(1L, 1L))
                 .isInstanceOf(IllegalStateException.class)

@@ -3,12 +3,8 @@ package dev.leo.library.infrastructure.adapter.input.rest;
 import dev.leo.library.application.dto.request.LoanRequestDto;
 import dev.leo.library.application.dto.response.BookCatalogResponse;
 import dev.leo.library.application.dto.response.BookDetailResponse;
-import dev.leo.library.domain.model.CopyStatus;
-import dev.leo.library.domain.port.input.BookCopyUseCase;
 import dev.leo.library.domain.port.input.BookUseCase;
 import dev.leo.library.domain.port.input.LoanUseCase;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopyEntity;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 import dev.leo.library.infrastructure.security.UserPrincipal;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import dev.leo.library.shared.dto.SuccessResponse;
@@ -19,10 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/catalog")
@@ -30,10 +22,8 @@ import java.util.Set;
 public class CatalogController {
 
     private final BookUseCase bookUseCase;
-    private final BookCopyUseCase bookCopyUseCase;
     private final LoanUseCase loanUseCase;
 
-    // Buscar libros activos con filtros: título, autor, categoría, idioma, año
     @GetMapping
     public PaginatedResponse<BookCatalogResponse> search(
             @RequestParam(required = false) String q,
@@ -42,43 +32,22 @@ public class CatalogController {
             @RequestParam(required = false) String language,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage) {
-        PaginatedResponse<BookEntity> books = bookUseCase.findAll(q, authorId, categoryId, language, true, page, perPage);
-        List<Long> ids = books.data().stream().map(BookEntity::getId).toList();
-        Set<Long> availableIds = ids.isEmpty() ? Set.of() : bookUseCase.findAvailableBookIds(ids);
-        List<BookCatalogResponse> mapped = books.data().stream()
-                .map(b -> BookCatalogResponse.from(b, availableIds.contains(b.getId()))).toList();
-        return PaginatedResponse.of(mapped, books.page(), books.perPage(), books.total());
+        return bookUseCase.searchCatalog(q, authorId, categoryId, language, page, perPage);
     }
 
-    // Ver detalle de un libro con sus ejemplares y disponibilidad
     @GetMapping("/{id}")
     public BookDetailResponse detail(@PathVariable Long id) {
-        BookEntity book = bookUseCase.findById(id);
-        List<BookCopyEntity> copies = bookCopyUseCase.findAll(null, id, null, null, 1, 100).data();
-        List<Long> copyIds = copies.stream().map(BookCopyEntity::getId).toList();
-        Set<Long> requestedIds = copyIds.isEmpty() ? Set.of() : new java.util.HashSet<>(loanUseCase.findRequestedCopyIds(copyIds));
-        return BookDetailResponse.from(book, copies, requestedIds);
+        return bookUseCase.detailCatalog(id);
     }
 
-    // Solicitar préstamo de un ejemplar específico (solo estudiantes autenticados)
     @PostMapping("/{bookId}/request")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<SuccessResponse> requestLoan(
             @PathVariable Long bookId,
             @Valid @RequestBody LoanRequestDto dto,
             @AuthenticationPrincipal UserPrincipal principal) {
-
-        // Validar que el ejemplar pertenece al libro indicado
-        BookCopyEntity copy = bookCopyUseCase.findById(dto.bookCopyId());
-        if (!copy.getBook().getId().equals(bookId))
-            throw new IllegalArgumentException("El ejemplar no pertenece al libro indicado");
-        if (copy.getStatus() != CopyStatus.AVAILABLE)
-            throw new IllegalStateException("El ejemplar no está disponible para préstamo");
-
-        var saved = loanUseCase.requestLoan(dto, principal.user().getId());
-        var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .replacePath("/api/v1/loans/{id}").buildAndExpand(saved.getId()).toUri();
-        return ResponseEntity.created(location)
+        loanUseCase.requestLoanFromCatalog(bookId, dto, principal.user().getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Solicitud de préstamo enviada correctamente"));
     }
 }

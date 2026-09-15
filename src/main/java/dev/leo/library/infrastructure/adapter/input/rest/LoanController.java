@@ -4,10 +4,10 @@ import dev.leo.library.application.dto.request.LoanRequest;
 import dev.leo.library.application.dto.request.LoanRequestDto;
 import dev.leo.library.application.dto.response.ActiveLoanResponse;
 import dev.leo.library.application.dto.response.LoanRequestSummaryResponse;
+import dev.leo.library.application.dto.response.LoanSummaryResponse;
 import dev.leo.library.application.dto.response.MyLoanResponse;
 import dev.leo.library.application.dto.response.MyLoanSummaryResponse;
 import dev.leo.library.domain.port.input.LoanUseCase;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.LoanEntity;
 import dev.leo.library.infrastructure.security.UserPrincipal;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import dev.leo.library.shared.dto.SuccessResponse;
@@ -18,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/loans")
@@ -50,13 +47,14 @@ public class LoanController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public PaginatedResponse<LoanEntity> findAll(
+    public PaginatedResponse<LoanSummaryResponse> findAll(
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) Long bookCopyId,
-            @RequestParam(required = false) Long loanStatusId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage) {
-        return useCase.findAll(userId, bookCopyId, loanStatusId, page, perPage);
+        return useCase.findAll(userId, bookCopyId, status, q, page, perPage);
     }
 
     @GetMapping("/my/summary")
@@ -81,13 +79,11 @@ public class LoanController {
             @RequestParam(required = false) Long loanStatusId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int perPage) {
-        PaginatedResponse<LoanEntity> loans = useCase.findAll(principal.user().getId(), null, loanStatusId, page, perPage);
-        List<MyLoanResponse> mapped = loans.data().stream().map(MyLoanResponse::from).toList();
-        return PaginatedResponse.of(mapped, loans.page(), loans.perPage(), loans.total());
+        return useCase.getMyLoans(principal.user().getId(), page, perPage);
     }
 
     @GetMapping("/{id}")
-    public LoanEntity findById(@PathVariable Long id) {
+    public LoanSummaryResponse findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
@@ -97,10 +93,8 @@ public class LoanController {
     public ResponseEntity<SuccessResponse> requestLoan(
             @Valid @RequestBody LoanRequestDto dto,
             @AuthenticationPrincipal UserPrincipal principal) {
-        LoanEntity saved = useCase.requestLoan(dto, principal.user().getId());
-        var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .replacePath("/api/v1/loans/{id}").buildAndExpand(saved.getId()).toUri();
-        return ResponseEntity.created(location)
+        useCase.requestLoan(dto, principal.user().getId());
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Solicitud de préstamo enviada correctamente"));
     }
 
@@ -118,10 +112,8 @@ public class LoanController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody LoanRequest dto) {
-        LoanEntity saved = useCase.save(dto);
-        var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(saved.getId()).toUri();
-        return ResponseEntity.created(location)
+        useCase.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Préstamo registrado correctamente"));
     }
 

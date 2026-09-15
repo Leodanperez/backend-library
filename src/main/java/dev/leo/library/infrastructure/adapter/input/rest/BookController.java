@@ -1,8 +1,8 @@
 package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.BookRequest;
+import dev.leo.library.application.dto.response.BookResponse;
 import dev.leo.library.domain.port.input.BookUseCase;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import dev.leo.library.shared.dto.SuccessResponse;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ public class BookController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public PaginatedResponse<BookEntity> findAll(
+    public PaginatedResponse<BookResponse> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long authorId,
             @RequestParam(required = false) Long categoryId,
@@ -35,16 +35,16 @@ public class BookController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public BookEntity findById(@PathVariable Long id) {
+    public BookResponse findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody BookRequest dto) {
-        BookEntity saved = useCase.save(dto);
+        BookResponse saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(saved.getId()).toUri();
+                .path("/{id}").buildAndExpand(saved.id()).toUri();
         return ResponseEntity.created(location)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Libro creado correctamente"));
     }

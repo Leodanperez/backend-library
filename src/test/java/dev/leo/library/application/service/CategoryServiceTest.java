@@ -1,9 +1,11 @@
 package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.CategoryRequest;
-import dev.leo.library.application.dto.response.CategorySelectResponse;
+import dev.leo.library.application.dto.response.CategoryResponse;
+import dev.leo.library.application.dto.response.SelectOptionsResponse.SelectItem;
 import dev.leo.library.domain.exception.CategoryNotFoundException;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.CategoryEntity;
+import dev.leo.library.infrastructure.adapter.output.persistence.repository.BookJpaRepository;
 import dev.leo.library.infrastructure.adapter.output.persistence.repository.CategoryJpaRepository;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,11 +28,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
-    @Mock
-    private CategoryJpaRepository repository;
-
-    @InjectMocks
-    private CategoryService service;
+    @Mock private CategoryJpaRepository repository;
+    @Mock private BookJpaRepository bookRepository;
+    @InjectMocks private CategoryService service;
 
     private CategoryEntity category;
     private CategoryRequest request;
@@ -45,30 +45,42 @@ class CategoryServiceTest {
     void findAll_returnsPagedResponse() {
         when(repository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(category)));
+        when(bookRepository.countActiveByCategoryId(1L)).thenReturn(2L);
 
-        PaginatedResponse<CategoryEntity> result = service.findAll(null, null, 1, 10);
+        PaginatedResponse<CategoryResponse> result = service.findAll(null, null, 1, 10);
 
         assertThat(result.data()).hasSize(1);
-        assertThat(result.total()).isEqualTo(1);
+        assertThat(result.data().get(0).bookCount()).isEqualTo(2);
     }
 
     @Test
     void findAllActive_returnsMappedList() {
         when(repository.findByActiveTrueOrderByNameAsc()).thenReturn(List.of(category));
 
-        List<CategorySelectResponse> result = service.findAllActive();
+        List<SelectItem> result = service.findAllActive();
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).name()).isEqualTo("Fiction");
+        assertThat(result.get(0).label()).isEqualTo("Fiction");
     }
 
     @Test
-    void findById_returnsCategory_whenExists() {
+    void findEntityById_returnsCategory_whenExists() {
         when(repository.findById(1L)).thenReturn(Optional.of(category));
 
-        CategoryEntity result = service.findById(1L);
+        CategoryEntity result = service.findEntityById(1L);
 
         assertThat(result.getName()).isEqualTo("Fiction");
+    }
+
+    @Test
+    void findById_returnsCategoryResponse_whenExists() {
+        when(repository.findById(1L)).thenReturn(Optional.of(category));
+        when(bookRepository.countActiveByCategoryId(1L)).thenReturn(0L);
+
+        CategoryResponse result = service.findById(1L);
+
+        assertThat(result.id()).isEqualTo(1L);
+        assertThat(result.name()).isEqualTo("Fiction");
     }
 
     @Test
@@ -84,9 +96,9 @@ class CategoryServiceTest {
         when(repository.existsByName("Fiction")).thenReturn(false);
         when(repository.save(any(CategoryEntity.class))).thenReturn(category);
 
-        CategoryEntity result = service.save(request);
+        CategoryResponse result = service.save(request);
 
-        assertThat(result.getName()).isEqualTo("Fiction");
+        assertThat(result.name()).isEqualTo("Fiction");
         verify(repository).save(any(CategoryEntity.class));
     }
 
@@ -105,9 +117,8 @@ class CategoryServiceTest {
         when(repository.existsByNameAndIdNot("Fiction", 1L)).thenReturn(false);
         when(repository.save(any(CategoryEntity.class))).thenReturn(category);
 
-        CategoryEntity result = service.update(1L, request);
+        service.update(1L, request);
 
-        assertThat(result).isNotNull();
         verify(repository).save(category);
     }
 
@@ -127,9 +138,9 @@ class CategoryServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(category));
         when(repository.save(category)).thenReturn(category);
 
-        CategoryEntity result = service.activate(1L);
+        service.activate(1L);
 
-        assertThat(result.isActive()).isTrue();
+        assertThat(category.isActive()).isTrue();
     }
 
     @Test
@@ -137,9 +148,9 @@ class CategoryServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(category));
         when(repository.save(category)).thenReturn(category);
 
-        CategoryEntity result = service.deactivate(1L);
+        service.deactivate(1L);
 
-        assertThat(result.isActive()).isFalse();
+        assertThat(category.isActive()).isFalse();
     }
 
     @Test

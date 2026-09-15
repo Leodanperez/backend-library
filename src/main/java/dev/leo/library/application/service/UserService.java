@@ -2,6 +2,8 @@ package dev.leo.library.application.service;
 
 import dev.leo.library.application.dto.request.UserRequest;
 import dev.leo.library.application.dto.request.UserUpdateRequest;
+import dev.leo.library.application.dto.response.SelectOptionsResponse.SelectItem;
+import dev.leo.library.application.dto.response.UserResponse;
 import dev.leo.library.domain.exception.UserNotFoundException;
 import dev.leo.library.domain.model.UserRole;
 import dev.leo.library.domain.port.input.UserUseCase;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,17 +28,30 @@ public class UserService implements UserUseCase {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public PaginatedResponse<UserEntity> findAll(String q, UserRole role, Boolean active, int page, int perPage) {
+    public List<SelectItem> findAllForSelect() {
+        return repository.findAll(Sort.by("lastName").ascending()).stream()
+                .filter(UserEntity::isActive)
+                .map(u -> new SelectItem(u.getId(), u.getFirstName() + " " + u.getLastName()))
+                .toList();
+    }
+
+    @Override
+    public PaginatedResponse<UserResponse> findAll(String q, UserRole role, Boolean active, int page, int perPage) {
         Page<UserEntity> result = repository.findAll(
                 UserSpec.filter(q, role, active),
                 PageRequest.of(page - 1, perPage, Sort.by("lastName").ascending())
         );
-        return PaginatedResponse.of(result.getContent(), page, perPage, result.getTotalElements());
+        return PaginatedResponse.of(result.getContent().stream().map(UserResponse::from).toList(), page, perPage, result.getTotalElements());
     }
 
     @Override
-    public UserEntity findById(Long id) {
+    public UserEntity findEntityById(Long id) {
         return repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+    }
+
+    @Override
+    public UserResponse findById(Long id) {
+        return UserResponse.from(findEntityById(id));
     }
 
     @Override
@@ -45,21 +61,21 @@ public class UserService implements UserUseCase {
 
     @Override
     @Transactional
-    public UserEntity save(UserRequest dto) {
+    public UserResponse save(UserRequest dto) {
         if (repository.existsByEmail(dto.email()))
             throw new IllegalStateException("El correo electrónico ya está registrado: " + dto.email());
-        return repository.save(UserEntity.builder()
+        return UserResponse.from(repository.save(UserEntity.builder()
                 .firstName(dto.firstName()).lastName(dto.lastName()).email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .phone(dto.phone()).address(dto.address()).birthDate(dto.birthDate())
                 .role(dto.role() != null ? dto.role() : UserRole.STUDENT)
-                .active(true).build());
+                .active(true).build()));
     }
 
     @Override
     @Transactional
-    public UserEntity update(Long id, UserUpdateRequest dto) {
-        UserEntity user = findById(id);
+    public void update(Long id, UserUpdateRequest dto) {
+        UserEntity user = findEntityById(id);
         if (!dto.email().equals(user.getEmail()) && repository.existsByEmail(dto.email()))
             throw new IllegalStateException("El correo electrónico ya está registrado: " + dto.email());
         user.setFirstName(dto.firstName()); user.setLastName(dto.lastName());
@@ -67,28 +83,28 @@ public class UserService implements UserUseCase {
         user.setAddress(dto.address()); user.setBirthDate(dto.birthDate());
         if (dto.role() != null) user.setRole(dto.role());
         if (dto.active() != null) user.setActive(dto.active());
-        return repository.save(user);
+        repository.save(user);
     }
 
     @Override
     @Transactional
-    public UserEntity activate(Long id) {
-        UserEntity user = findById(id);
+    public void activate(Long id) {
+        UserEntity user = findEntityById(id);
         user.setActive(true);
-        return repository.save(user);
+        repository.save(user);
     }
 
     @Override
     @Transactional
-    public UserEntity deactivate(Long id) {
-        UserEntity user = findById(id);
+    public void deactivate(Long id) {
+        UserEntity user = findEntityById(id);
         user.setActive(false);
-        return repository.save(user);
+        repository.save(user);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        repository.delete(findById(id));
+        repository.delete(findEntityById(id));
     }
 }

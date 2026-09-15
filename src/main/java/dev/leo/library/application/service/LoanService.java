@@ -5,6 +5,7 @@ import dev.leo.library.application.dto.request.LoanRequestDto;
 import dev.leo.library.application.dto.response.ActiveLoanResponse;
 import dev.leo.library.application.dto.response.LoanRequestSummaryResponse;
 import dev.leo.library.application.dto.response.LoanRequestItemResponse;
+import dev.leo.library.application.dto.response.LoanSummaryResponse;
 import dev.leo.library.application.dto.response.MyLoanResponse;
 import dev.leo.library.application.dto.response.MyLoanSummaryResponse;
 import dev.leo.library.domain.exception.BookCopyNotFoundException;
@@ -102,6 +103,16 @@ public class LoanService implements LoanUseCase {
     }
 
     @Override
+    public PaginatedResponse<MyLoanResponse> getMyLoans(Long userId, int page, int perPage) {
+        Page<LoanEntity> result = loanRepository.findAll(
+                LoanSpec.filter(userId, null, null),
+                PageRequest.of(page - 1, perPage, Sort.by("loanDate").descending())
+        );
+        return PaginatedResponse.of(result.getContent().stream().map(MyLoanResponse::from).toList(),
+                page, perPage, result.getTotalElements());
+    }
+
+    @Override
     public PaginatedResponse<MyLoanResponse> getHistory(Long userId, int page, int perPage) {
         Page<LoanEntity> result = loanRepository.findByUserIdAndLoanStatus_Name(
                 userId, "RETURNED",
@@ -112,30 +123,38 @@ public class LoanService implements LoanUseCase {
     }
 
     @Override
-    public PaginatedResponse<LoanEntity> findAll(Long userId, Long bookCopyId, Long loanStatusId, int page, int perPage) {
-        Page<LoanEntity> result = loanRepository.findAll(
-                LoanSpec.filter(userId, bookCopyId, loanStatusId),
+    public PaginatedResponse<LoanSummaryResponse> findAll(Long userId, Long bookCopyId, String status, String q, int page, int perPage) {
+        Page<LoanEntity> result = loanRepository.findAllLoans(
+                userId, bookCopyId, status, q,
                 PageRequest.of(page - 1, perPage, Sort.by("loanDate").descending())
         );
-        return PaginatedResponse.of(result.getContent(), page, perPage, result.getTotalElements());
+        var mapped = result.getContent().stream().map(LoanSummaryResponse::from).toList();
+        return PaginatedResponse.of(mapped, page, perPage, result.getTotalElements());
     }
 
     @Override
-    public LoanEntity findById(Long id) {
+    public LoanEntity findEntityById(Long id) {
         return loanRepository.findById(id).orElseThrow(() -> new LoanNotFoundException(id));
     }
 
     @Override
+    public LoanSummaryResponse findById(Long id) {
+        return LoanSummaryResponse.from(findEntityById(id));
+    }
+
+    @Override
     @Transactional
-    public LoanEntity requestLoan(LoanRequestDto dto, Long studentId) {
+    public void requestLoanFromCatalog(Long bookId, LoanRequestDto dto, Long studentId) {
         BookCopyEntity copy = bookCopyRepository.findById(dto.bookCopyId())
                 .orElseThrow(() -> new BookCopyNotFoundException(dto.bookCopyId()));
+        if (!copy.getBook().getId().equals(bookId))
+            throw new IllegalArgumentException("El ejemplar no pertenece al libro indicado");
         if (copy.getStatus() != CopyStatus.AVAILABLE)
             throw new IllegalStateException("El ejemplar no está disponible para préstamo");
-        if (loanRepository.existsActiveRequestByUserAndBook(studentId, copy.getBook().getId()))
+        if (loanRepository.existsActiveRequestByUserAndBook(studentId, bookId))
             throw new IllegalStateException("Ya tienes una solicitud activa para este libro");
-        return loanRepository.save(LoanEntity.builder()
-                .bookCopy(copy).user(userService.findById(studentId))
+        loanRepository.save(LoanEntity.builder()
+                .bookCopy(copy).user(userService.findEntityById(studentId))
                 .loanStatus(getStatusByName("REQUESTED"))
                 .loanDate(LocalDateTime.now()).dueDate(dto.dueDate())
                 .renewalCount(0).observations(dto.observations()).build());
@@ -143,8 +162,24 @@ public class LoanService implements LoanUseCase {
 
     @Override
     @Transactional
-    public LoanEntity approveLoan(Long id, Long librarianId) {
-        LoanEntity loan = findById(id);
+    public void requestLoan(LoanRequestDto dto, Long studentId) {
+        BookCopyEntity copy = bookCopyRepository.findById(dto.bookCopyId())
+                .orElseThrow(() -> new BookCopyNotFoundException(dto.bookCopyId()));
+        if (copy.getStatus() != CopyStatus.AVAILABLE)
+            throw new IllegalStateException("El ejemplar no está disponible para préstamo");
+        if (loanRepository.existsActiveRequestByUserAndBook(studentId, copy.getBook().getId()))
+            throw new IllegalStateException("Ya tienes una solicitud activa para este libro");
+        loanRepository.save(LoanEntity.builder()
+                .bookCopy(copy).user(userService.findEntityById(studentId))
+                .loanStatus(getStatusByName("REQUESTED"))
+                .loanDate(LocalDateTime.now()).dueDate(dto.dueDate())
+                .renewalCount(0).observations(dto.observations()).build());
+    }
+
+    @Override
+    @Transactional
+    public void approveLoan(Long id, Long librarianId) {
+        LoanEntity loan = findEntityById(id);
         if (!"REQUESTED".equals(loan.getLoanStatus().getName()))
             throw new IllegalStateException("Solo se pueden aprobar solicitudes en estado SOLICITADO");
         BookCopyEntity copy = loan.getBookCopy();
@@ -153,33 +188,31 @@ public class LoanService implements LoanUseCase {
         loan.setLoanStatus(getStatusByName("PENDING"));
         copy.setStatus(CopyStatus.LOANED);
         bookCopyRepository.save(copy);
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity save(LoanRequest dto) {
+    public void save(LoanRequest dto) {
         BookCopyEntity copy = bookCopyRepository.findById(dto.bookCopyId())
                 .orElseThrow(() -> new BookCopyNotFoundException(dto.bookCopyId()));
         if (copy.getStatus() != CopyStatus.AVAILABLE)
             throw new IllegalStateException("El ejemplar no está disponible para préstamo");
-
         LoanEntity loan = LoanEntity.builder()
-                .bookCopy(copy).user(userService.findById(dto.userId()))
+                .bookCopy(copy).user(userService.findEntityById(dto.userId()))
                 .loanStatus(getStatusByName("PENDING"))
                 .loanDate(dto.loanDate() != null ? dto.loanDate() : LocalDateTime.now())
                 .dueDate(dto.dueDate()).renewalCount(0).observations(dto.observations())
                 .build();
-
         copy.setStatus(CopyStatus.LOANED);
         bookCopyRepository.save(copy);
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity returnLoan(Long id, String observations) {
-        LoanEntity loan = findById(id);
+    public void returnLoan(Long id, String observations) {
+        LoanEntity loan = findEntityById(id);
         if ("RETURNED".equals(loan.getLoanStatus().getName()))
             throw new IllegalStateException("El préstamo ya fue devuelto");
         if ("CANCELLED".equals(loan.getLoanStatus().getName()))
@@ -190,13 +223,13 @@ public class LoanService implements LoanUseCase {
         BookCopyEntity copy = loan.getBookCopy();
         copy.setStatus(CopyStatus.AVAILABLE);
         bookCopyRepository.save(copy);
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity renewLoan(Long id, int days) {
-        LoanEntity loan = findById(id);
+    public void renewLoan(Long id, int days) {
+        LoanEntity loan = findEntityById(id);
         String status = loan.getLoanStatus().getName();
         if (TERMINAL_STATUSES.contains(status))
             throw new IllegalStateException("No se puede renovar un préstamo con estado: " + status.toLowerCase());
@@ -206,13 +239,13 @@ public class LoanService implements LoanUseCase {
         loan.setRenewalCount(loan.getRenewalCount() + 1);
         if ("OVERDUE".equals(status))
             loan.setLoanStatus(getStatusByName("PENDING"));
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity cancelLoan(Long id) {
-        LoanEntity loan = findById(id);
+    public void cancelLoan(Long id) {
+        LoanEntity loan = findEntityById(id);
         String status = loan.getLoanStatus().getName();
         if (TERMINAL_STATUSES.contains(status))
             throw new IllegalStateException("El préstamo ya se encuentra en estado: " + status.toLowerCase());
@@ -222,25 +255,25 @@ public class LoanService implements LoanUseCase {
             copy.setStatus(CopyStatus.AVAILABLE);
             bookCopyRepository.save(copy);
         }
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity cancelLoanByStudent(Long id, Long studentId) {
-        LoanEntity loan = findById(id);
+    public void cancelLoanByStudent(Long id, Long studentId) {
+        LoanEntity loan = findEntityById(id);
         if (!loan.getUser().getId().equals(studentId))
             throw new IllegalStateException("No tienes permiso para cancelar este préstamo");
         if (!"REQUESTED".equals(loan.getLoanStatus().getName()))
             throw new IllegalStateException("Solo puedes cancelar solicitudes en estado SOLICITADO");
         loan.setLoanStatus(getStatusByName("CANCELLED"));
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
-    public LoanEntity update(Long id, LoanRequest dto) {
-        LoanEntity loan = findById(id);
+    public void update(Long id, LoanRequest dto) {
+        LoanEntity loan = findEntityById(id);
         loan.setDueDate(dto.dueDate());
         if (dto.returnDate() != null) loan.setReturnDate(dto.returnDate());
         if (dto.observations() != null) loan.setObservations(dto.observations());
@@ -248,12 +281,12 @@ public class LoanService implements LoanUseCase {
             loan.setLoanStatus(loanStatusRepository.findById(dto.loanStatusId())
                     .orElseThrow(() -> new LoanStatusNotFoundException("id: " + dto.loanStatusId())));
         }
-        return loanRepository.save(loan);
+        loanRepository.save(loan);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        loanRepository.delete(findById(id));
+        loanRepository.delete(findEntityById(id));
     }
 }

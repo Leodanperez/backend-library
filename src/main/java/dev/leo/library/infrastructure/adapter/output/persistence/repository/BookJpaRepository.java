@@ -13,6 +13,12 @@ public interface BookJpaRepository extends JpaRepository<BookEntity, Long>, JpaS
     Optional<BookEntity> findByIsbn(String isbn);
     boolean existsByIsbn(String isbn);
 
+    @Query("SELECT COUNT(b) FROM BookEntity b WHERE b.author.id = :authorId AND b.active = true")
+    long countActiveByAuthorId(@Param("authorId") Long authorId);
+
+    @Query("SELECT COUNT(b) FROM BookEntity b WHERE b.category.id = :categoryId AND b.active = true")
+    long countActiveByCategoryId(@Param("categoryId") Long categoryId);
+
     @Query("""
             SELECT DISTINCT bc.book.id FROM BookCopyEntity bc
             WHERE bc.book.id IN :ids

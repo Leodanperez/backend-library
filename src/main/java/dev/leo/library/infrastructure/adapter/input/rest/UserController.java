@@ -2,9 +2,9 @@ package dev.leo.library.infrastructure.adapter.input.rest;
 
 import dev.leo.library.application.dto.request.UserRequest;
 import dev.leo.library.application.dto.request.UserUpdateRequest;
+import dev.leo.library.application.dto.response.UserResponse;
 import dev.leo.library.domain.model.UserRole;
 import dev.leo.library.domain.port.input.UserUseCase;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.UserEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import dev.leo.library.shared.dto.SuccessResponse;
 import jakarta.validation.Valid;
@@ -24,7 +24,7 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public PaginatedResponse<UserEntity> findAll(
+    public PaginatedResponse<UserResponse> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) UserRole role,
             @RequestParam(required = false) Boolean active,
@@ -35,16 +35,16 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    public UserEntity findById(@PathVariable Long id) {
+    public UserResponse findById(@PathVariable Long id) {
         return useCase.findById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SuccessResponse> save(@Valid @RequestBody UserRequest dto) {
-        UserEntity saved = useCase.save(dto);
+        UserResponse saved = useCase.save(dto);
         var location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}").buildAndExpand(saved.getId()).toUri();
+                .path("/{id}").buildAndExpand(saved.id()).toUri();
         return ResponseEntity.created(location)
                 .body(SuccessResponse.of(HttpStatus.CREATED.value(), "Usuario creado correctamente"));
     }

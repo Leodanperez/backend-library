@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo · Bibliotecario · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Bibliotecario</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="solicitudes.html"><span class="icon">◉</span> Solicitudes</a></li>
+            <li><a href="prestamos.html"><span class="icon">▦</span> Préstamos</a></li>
+            <li><a href="catalogo.html" aria-current="page"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Catálogo</h1>
+          </div>
+          <div class="user-chip">
+            <span class="avatar" aria-hidden="true">AF</span>
+            <span>Aldo Fernández</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <header style="margin-bottom:1.5em">
+            <p class="text-soft">Gestiona libros, ejemplares físicos, autores y categorías del instituto.</p>
+          </header>
+
+          <nav class="tabs" aria-label="Secciones del catálogo">
+            <a href="#" class="tab-link" data-tab="libros" aria-current="page">Libros</a>
+            <a href="#" class="tab-link" data-tab="ejemplares">Ejemplares</a>
+            <a href="#" class="tab-link" data-tab="autores">Autores</a>
+            <a href="#" class="tab-link" data-tab="categorias">Categorías</a>
+          </nav>
+
+          <!-- LIBROS -->
+          <div id="panel-libros">
+            <section class="table-card" aria-label="Libros">
+              <div class="table-card-head">
+                <form class="search-row" role="search" action="#">
+                  <label for="buscar-libro" class="sr-only">Buscar libro</label>
+                  <input type="search" id="buscar-libro" name="q" placeholder="Buscar por título, ISBN o autor…" />
+                  <select aria-label="Filtrar por categoría">
+                    <option>Todas las categorías</option>
+                    <option>Literatura</option>
+                    <option>Ingeniería de software</option>
+                    <option>Historia</option>
+                  </select>
+                </form>
+                <button class="btn btn-primary" onclick="openModal('modal-libro')">+ Nuevo libro</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Título</th>
+                      <th scope="col">Autor</th>
+                      <th scope="col">Categoría</th>
+                      <th scope="col">ISBN</th>
+                      <th scope="col">Ejemplares</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">1967 · Editorial Sudamericana</span></td>
+                      <td>Gabriel García Márquez</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-376-0494-7</td>
+                      <td>4 de 6 disponibles</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-libro')">Editar</button><button class="btn btn-quiet" onclick="switchTab('ejemplares')">Ejemplares</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Redes de computadoras</span><span class="cell-sub">2020 · Pearson</span></td>
+                      <td>Andrew S. Tanenbaum</td>
+                      <td>Ingeniería de software</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-0-13-359414-0</td>
+                      <td>1 de 3 disponibles</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-libro')">Editar</button><button class="btn btn-quiet" onclick="switchTab('ejemplares')">Ejemplares</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">1963 · Seix Barral</span></td>
+                      <td>Mario Vargas Llosa</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-322-0641-2</td>
+                      <td>0 de 2 disponibles</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-libro')">Editar</button><button class="btn btn-quiet" onclick="switchTab('ejemplares')">Ejemplares</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">El Aleph</span><span class="cell-sub">1949 · Losada</span></td>
+                      <td>Jorge Luis Borges</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-206-1941-7</td>
+                      <td>2 de 3 disponibles</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-libro')">Editar</button><button class="btn btn-quiet" onclick="switchTab('ejemplares')">Ejemplares</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–4 de 1,284</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- EJEMPLARES -->
+          <div id="panel-ejemplares" style="display:none">
+            <section class="table-card" aria-label="Ejemplares">
+              <div class="table-card-head">
+                <div>
+                  <h2 style="margin:0;font-size:var(--step1)">Ejemplares físicos</h2>
+                  <p class="text-soft" style="margin:0.15em 0 0;font-size:0.78rem">Cada copia física tiene un código único e independiente del título.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('modal-ejemplar')">+ Nuevo ejemplar</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Código</th>
+                      <th scope="col">Libro</th>
+                      <th scope="col">Ubicación</th>
+                      <th scope="col">Condición</th>
+                      <th scope="col">Adquisición</th>
+                      <th scope="col">Estado</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title" style="font-family:var(--font-mono)">EJ-0104</td>
+                      <td>Cien años de soledad</td>
+                      <td>Estante A-3</td>
+                      <td>Bueno</td>
+                      <td>12 ene 2022</td>
+                      <td><span class="stamp stamp-loaned">Prestado</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-ejemplar')">Editar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title" style="font-family:var(--font-mono)">EJ-0105</td>
+                      <td>Cien años de soledad</td>
+                      <td>Estante A-3</td>
+                      <td>Nuevo</td>
+                      <td>12 ene 2022</td>
+                      <td><span class="stamp stamp-available">Disponible</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-ejemplar')">Editar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title" style="font-family:var(--font-mono)">EJ-0106</td>
+                      <td>Cien años de soledad</td>
+                      <td>Estante A-3</td>
+                      <td>Deteriorado</td>
+                      <td>30 jun 2019</td>
+                      <td><span class="stamp stamp-lost">De baja</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-ejemplar')">Editar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title" style="font-family:var(--font-mono)">EJ-0231</td>
+                      <td>La ciudad y los perros</td>
+                      <td>Estante B-2</td>
+                      <td>Bueno</td>
+                      <td>05 mar 2021</td>
+                      <td><span class="stamp stamp-loaned">Prestado</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-ejemplar')">Editar</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–4 de 3,842</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- AUTORES -->
+          <div id="panel-autores" style="display:none">
+            <section class="table-card" aria-label="Autores">
+              <div class="table-card-head">
+                <form class="search-row" role="search" action="#">
+                  <label for="buscar-autor" class="sr-only">Buscar autor</label>
+                  <input type="search" id="buscar-autor" name="q" placeholder="Buscar autor…" />
+                </form>
+                <button class="btn btn-primary" onclick="openModal('modal-autor')">+ Nuevo autor</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Nombre</th>
+                      <th scope="col">Nacionalidad</th>
+                      <th scope="col">Libros</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title">Gabriel García Márquez</td>
+                      <td>Colombia</td>
+                      <td>3</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-autor')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Mario Vargas Llosa</td>
+                      <td>Perú</td>
+                      <td>5</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-autor')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Andrew S. Tanenbaum</td>
+                      <td>Países Bajos</td>
+                      <td>2</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-autor')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Jorge Luis Borges</td>
+                      <td>Argentina</td>
+                      <td>4</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-autor')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–4 de 312</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- CATEGORÍAS -->
+          <div id="panel-categorias" style="display:none">
+            <section class="table-card" aria-label="Categorías">
+              <div class="table-card-head">
+                <h2 style="margin:0;font-size:var(--step1)">Categorías del catálogo</h2>
+                <button class="btn btn-primary" onclick="openModal('modal-categoria')">+ Nueva categoría</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Nombre</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Libros</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title">Literatura</td>
+                      <td>Novela, cuento y poesía en español y traducciones.</td>
+                      <td>412</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Ingeniería de software</td>
+                      <td>Programación, redes y arquitectura de sistemas.</td>
+                      <td>198</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Historia</td>
+                      <td>Historia universal y del Perú.</td>
+                      <td>156</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Matemáticas</td>
+                      <td>Álgebra, cálculo, estadística y geometría.</td>
+                      <td>98</td>
+                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Libro -->
+    <div class="modal-backdrop" id="modal-libro" role="dialog" aria-modal="true" aria-labelledby="ml-titulo">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <h2 id="ml-titulo">Registrar libro</h2>
+          <button class="modal-close" onclick="closeModal('modal-libro')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-libro" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="libro-titulo">Título</label>
+                <input type="text" id="libro-titulo" name="titulo" placeholder="Ej. Cien años de soledad" required />
+              </div>
+              <div class="field">
+                <label for="libro-isbn">ISBN</label>
+                <input type="text" id="libro-isbn" name="isbn" placeholder="978-XX-XXX-XXXX-X" />
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="libro-autor">Autor</label>
+                <select id="libro-autor" name="autor_id" required>
+                  <option value="">Seleccionar autor…</option>
+                  <option>Gabriel García Márquez</option>
+                  <option>Mario Vargas Llosa</option>
+                  <option>Andrew S. Tanenbaum</option>
+                  <option>Jorge Luis Borges</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="libro-categoria">Categoría</label>
+                <select id="libro-categoria" name="categoria_id" required>
+                  <option value="">Seleccionar categoría…</option>
+                  <option>Literatura</option>
+                  <option>Ingeniería de software</option>
+                  <option>Historia</option>
+                  <option>Matemáticas</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="libro-editorial">Editorial</label>
+                <input type="text" id="libro-editorial" name="editorial" placeholder="Ej. Editorial Sudamericana" />
+              </div>
+              <div class="field">
+                <label for="libro-anio">Año de publicación</label>
+                <input type="number" id="libro-anio" name="anio" placeholder="Ej. 1967" min="1800" max="2099" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="libro-descripcion">Descripción (opcional)</label>
+              <textarea id="libro-descripcion" name="descripcion" placeholder="Breve sinopsis o notas sobre el libro…"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-libro')">Cancelar</button>
+          <button class="btn btn-primary" form="form-libro" type="submit">Guardar libro</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Ejemplar -->
+    <div class="modal-backdrop" id="modal-ejemplar" role="dialog" aria-modal="true" aria-labelledby="me-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="me-titulo">Registrar ejemplar</h2>
+          <button class="modal-close" onclick="closeModal('modal-ejemplar')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-ejemplar" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="ej-codigo">Código de ejemplar</label>
+                <input type="text" id="ej-codigo" name="codigo" placeholder="Ej. EJ-0107" required />
+              </div>
+              <div class="field">
+                <label for="ej-libro">Libro</label>
+                <select id="ej-libro" name="libro_id" required>
+                  <option value="">Seleccionar libro…</option>
+                  <option>Cien años de soledad</option>
+                  <option>Redes de computadoras</option>
+                  <option>La ciudad y los perros</option>
+                  <option>El Aleph</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="ej-ubicacion">Ubicación</label>
+                <input type="text" id="ej-ubicacion" name="ubicacion" placeholder="Ej. Estante A-3" />
+              </div>
+              <div class="field">
+                <label for="ej-condicion">Condición</label>
+                <select id="ej-condicion" name="condicion">
+                  <option>Nuevo</option>
+                  <option>Bueno</option>
+                  <option>Regular</option>
+                  <option>Deteriorado</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="ej-adquisicion">Fecha de adquisición</label>
+                <input type="date" id="ej-adquisicion" name="fecha_adquisicion" />
+              </div>
+              <div class="field">
+                <label for="ej-estado">Estado</label>
+                <select id="ej-estado" name="estado">
+                  <option>Disponible</option>
+                  <option>Prestado</option>
+                  <option>De baja</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-ejemplar')">Cancelar</button>
+          <button class="btn btn-primary" form="form-ejemplar" type="submit">Guardar ejemplar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Autor -->
+    <div class="modal-backdrop" id="modal-autor" role="dialog" aria-modal="true" aria-labelledby="ma-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="ma-titulo">Registrar autor</h2>
+          <button class="modal-close" onclick="closeModal('modal-autor')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-autor" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="autor-nombre">Nombre completo</label>
+                <input type="text" id="autor-nombre" name="nombre" placeholder="Ej. Gabriel García Márquez" required />
+              </div>
+              <div class="field">
+                <label for="autor-nacionalidad">Nacionalidad</label>
+                <input type="text" id="autor-nacionalidad" name="nacionalidad" placeholder="Ej. Colombia" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="autor-bio">Biografía breve (opcional)</label>
+              <textarea id="autor-bio" name="biografia" placeholder="Notas sobre el autor…"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-autor')">Cancelar</button>
+          <button class="btn btn-primary" form="form-autor" type="submit">Guardar autor</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Categoría -->
+    <div class="modal-backdrop" id="modal-categoria" role="dialog" aria-modal="true" aria-labelledby="mc-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="mc-titulo">Registrar categoría</h2>
+          <button class="modal-close" onclick="closeModal('modal-categoria')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-categoria" novalidate>
+            <div class="field">
+              <label for="cat-nombre">Nombre de la categoría</label>
+              <input type="text" id="cat-nombre" name="nombre" placeholder="Ej. Ciencias naturales" required />
+            </div>
+            <div class="field">
+              <label for="cat-descripcion">Descripción</label>
+              <textarea id="cat-descripcion" name="descripcion" placeholder="Describe qué tipo de libros incluye esta categoría…"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-categoria')">Cancelar</button>
+          <button class="btn btn-primary" form="form-categoria" type="submit">Guardar categoría</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const TABS = ['libros','ejemplares','autores','categorias'];
+
+      function switchTab(tab) {
+        document.querySelectorAll('.tab-link').forEach(l => {
+          l.removeAttribute('aria-current');
+          if (l.dataset.tab === tab) l.setAttribute('aria-current','page');
+        });
+        TABS.forEach(t => {
+          document.getElementById('panel-' + t).style.display = t === tab ? '' : 'none';
+        });
+      }
+
+      document.querySelectorAll('.tab-link').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          switchTab(link.dataset.tab);
+        });
+      });
+
+      function openModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(b => {
+        b.addEventListener('click', e => { if (e.target === b) closeModal(b.id); });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.is-open').forEach(m => closeModal(m.id));
+      });
+    </script>
+  </body>
+</html>

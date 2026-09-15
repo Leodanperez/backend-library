@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solicitudes · Bibliotecario · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <style>
+      /* ---- Solicitud card ---- */
+      .sol-card {
+        background: var(--surface-raised);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-m);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+        transition: box-shadow var(--transition);
+      }
+      .sol-card:hover { box-shadow: 0 4px 20px -4px rgba(43,38,24,0.2); }
+
+      .sol-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1em;
+        padding: 1em 1.25em;
+        border-bottom: 1.5px solid var(--border);
+        background: var(--surface);
+      }
+      .sol-book-thumb {
+        width: 3.2em;
+        height: 4.2em;
+        border-radius: var(--radius-s);
+        background: linear-gradient(155deg, var(--green-tint), var(--surface-alt));
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+      }
+      .sol-book-info { flex: 1; min-width: 0; }
+      .sol-book-info h3 {
+        margin: 0 0 0.1em;
+        font-size: var(--step1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .sol-book-info p { margin: 0; font-size: 0.78rem; color: var(--ink-soft); }
+
+      .sol-card-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+      .sol-student {
+        padding: 1em 1.25em;
+        border-right: 1px solid var(--border);
+      }
+      .sol-dates {
+        padding: 1em 1.25em;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+      }
+      .sol-label {
+        font-size: 0.72rem;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-faint);
+        margin-bottom: 0.2em;
+        display: block;
+      }
+      .sol-value {
+        font-size: var(--step1);
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .sol-note {
+        padding: 0.75em 1.25em;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        font-size: 0.78rem;
+        color: var(--ink-soft);
+        display: flex;
+        gap: 0.5em;
+        align-items: flex-start;
+      }
+      .sol-note-icon { flex-shrink: 0; opacity: 0.5; }
+
+      .sol-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85em 1.25em;
+        border-top: 1.5px solid var(--border);
+        gap: 0.75em;
+        flex-wrap: wrap;
+      }
+      .sol-avail {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+        font-size: 0.78rem;
+        color: var(--ink-soft);
+      }
+      .sol-avail strong { color: var(--ink); font-family: var(--font-mono); }
+
+      /* Estado aprobada */
+      .sol-card.is-aprobada { border-left: 4px solid var(--green); }
+      .sol-card.is-aprobada .sol-card-header { background: var(--green-tint); }
+
+      /* Estado rechazada */
+      .sol-card.is-rechazada { border-left: 4px solid var(--red); opacity: 0.7; }
+      .sol-card.is-rechazada .sol-card-header { background: var(--red-tint); }
+
+      /* Estado pendiente */
+      .sol-card.is-pendiente { border-left: 4px solid #d97706; }
+
+      /* Grid de solicitudes */
+      .sol-grid {
+        display: grid;
+        gap: 1.1em;
+        grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+      }
+
+      /* Avatar estudiante */
+      .student-avatar {
+        width: 2.2em; height: 2.2em;
+        border-radius: 50%;
+        background: var(--brass-tint);
+        border: 1.5px solid var(--border);
+        display: grid;
+        place-items: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 0.78rem;
+        color: var(--brass);
+        flex-shrink: 0;
+      }
+
+      /* Filtro activo */
+      .filter-btn {
+        padding: 0.4em 0.9em;
+        border-radius: 999px;
+        border: 1.5px solid var(--border);
+        background: var(--surface-raised);
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--ink-soft);
+        transition: all var(--transition);
+      }
+      .filter-btn:hover { border-color: var(--ink-faint); color: var(--ink); }
+      .filter-btn.active { background: var(--green); color: #fff; border-color: var(--green-dark); }
+      .filter-btn.active-amber { background: #d97706; color: #fff; border-color: #b45309; }
+
+      @media (max-width: 640px) {
+        .sol-card-body { grid-template-columns: 1fr; }
+        .sol-student { border-right: none; border-bottom: 1px solid var(--border); }
+        .sol-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Bibliotecario</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="solicitudes.html" aria-current="page"><span class="icon">◉</span> Solicitudes</a></li>
+            <li><a href="prestamos.html"><span class="icon">▦</span> Préstamos</a></li>
+            <li><a href="catalogo.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Solicitudes de préstamo</h1>
+          </div>
+          <div class="user-chip">
+            <span class="avatar" aria-hidden="true">AF</span>
+            <span>Aldo Fernández</span>
+          </div>
+        </header>
+
+        <div class="page">
+
+          <!-- Stats -->
+          <div class="stat-grid" style="margin-bottom:1.75em">
+            <div class="stat-card">
+              <span class="stat-value" style="color:#d97706" id="cnt-pendientes">3</span>
+              <span class="stat-label">Pendientes de revisión</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" style="color:var(--green-dark)" id="cnt-aprobadas">1</span>
+              <span class="stat-label">Aprobadas hoy</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" style="color:var(--red)" id="cnt-rechazadas">1</span>
+              <span class="stat-label">Rechazadas hoy</span>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75em;margin-bottom:1.4em">
+            <div style="display:flex;gap:0.5em;flex-wrap:wrap" id="filtros">
+              <button class="filter-btn active-amber active" data-filter="pendiente">⏳ Pendientes (3)</button>
+              <button class="filter-btn" data-filter="aprobada">✓ Aprobadas (1)</button>
+              <button class="filter-btn" data-filter="rechazada">✕ Rechazadas (1)</button>
+              <button class="filter-btn" data-filter="todas">Todas</button>
+            </div>
+            <form class="search-row" role="search" style="flex-wrap:nowrap">
+              <label for="buscar-sol" class="sr-only">Buscar solicitud</label>
+              <input type="search" id="buscar-sol" placeholder="Buscar por estudiante o libro…" style="min-width:14rem" />
+            </form>
+          </div>
+
+          <!-- Grid de solicitudes -->
+          <div class="sol-grid" id="sol-grid">
+
+            <!-- PENDIENTE 1 -->
+            <div class="sol-card is-pendiente" data-estado="pendiente">
+              <div class="sol-card-header">
+                <div class="sol-book-thumb"></div>
+                <div class="sol-book-info">
+                  <h3>Cien años de soledad</h3>
+                  <p>Gabriel García Márquez · 863.44 GAR</p>
+                  <p style="margin-top:0.25em"><span class="stamp stamp-available" style="font-size:0.68rem">4 disponibles</span></p>
+                </div>
+                <span class="stamp stamp-pending" style="align-self:flex-start">Pendiente</span>
+              </div>
+              <div class="sol-card-body">
+                <div class="sol-student">
+                  <span class="sol-label">Estudiante</span>
+                  <div style="display:flex;align-items:center;gap:0.6em;margin-top:0.3em">
+                    <div class="student-avatar">MR</div>
+                    <div>
+                      <p style="margin:0;font-weight:600;font-size:var(--step1)">Micaela Ríos Paredes</p>
+                      <p style="margin:0;font-size:0.75rem;color:var(--ink-soft)">micaela.rios@instituto.edu.pe</p>
+                    </div>
+                  </div>
+                  <div style="margin-top:0.75em;display:flex;gap:0.5em;flex-wrap:wrap">
+                    <span style="font-size:0.72rem;background:var(--green-tint);color:var(--green-dark);padding:0.15em 0.5em;border-radius:999px;font-weight:600">Sin vencidos</span>
+                    <span style="font-size:0.72rem;background:var(--surface-alt);color:var(--ink-soft);padding:0.15em 0.5em;border-radius:999px">2 préstamos activos</span>
+                  </div>
+                </div>
+                <div class="sol-dates">
+                  <div>
+                    <span class="sol-label">Solicitado</span>
+                    <span class="sol-value">18 mar 2026</span>
+                  </div>
+                  <div>
+                    <span class="sol-label">Recojo previsto</span>
+                    <span class="sol-value">20 mar 2026</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sol-note">
+                <span class="sol-note-icon">💬</span>
+                <span><em>Sin nota del estudiante.</em></span>
+              </div>
+              <div class="sol-card-footer">
+                <div class="sol-avail">
+                  <span>Ejemplar sugerido:</span>
+                  <strong>EJ-0105</strong>
+                  <span style="color:var(--ink-faint)">· Estante A-3</span>
+                </div>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-danger" onclick="openModalRechazo(this)">Rechazar</button>
+                  <button class="btn btn-primary" onclick="aprobar(this)">✓ Aprobar</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PENDIENTE 2 -->
+            <div class="sol-card is-pendiente" data-estado="pendiente">
+              <div class="sol-card-header">
+                <div class="sol-book-thumb" style="background:linear-gradient(155deg,#fef3c7,#fde68a)"></div>
+                <div class="sol-book-info">
+                  <h3>Los ríos profundos</h3>
+                  <p>José María Arguedas · 863.44 ARG</p>
+                  <p style="margin-top:0.25em"><span class="stamp stamp-loaned" style="font-size:0.68rem">1 disponible</span></p>
+                </div>
+                <span class="stamp stamp-pending" style="align-self:flex-start">Pendiente</span>
+              </div>
+              <div class="sol-card-body">
+                <div class="sol-student">
+                  <span class="sol-label">Estudiante</span>
+                  <div style="display:flex;align-items:center;gap:0.6em;margin-top:0.3em">
+                    <div class="student-avatar" style="background:var(--brass-tint);color:var(--brass)">FT</div>
+                    <div>
+                      <p style="margin:0;font-weight:600;font-size:var(--step1)">Fabrizio Torres Luna</p>
+                      <p style="margin:0;font-size:0.75rem;color:var(--ink-soft)">fabrizio.torres@instituto.edu.pe</p>
+                    </div>
+                  </div>
+                  <div style="margin-top:0.75em;display:flex;gap:0.5em;flex-wrap:wrap">
+                    <span style="font-size:0.72rem;background:var(--green-tint);color:var(--green-dark);padding:0.15em 0.5em;border-radius:999px;font-weight:600">Sin vencidos</span>
+                    <span style="font-size:0.72rem;background:var(--surface-alt);color:var(--ink-soft);padding:0.15em 0.5em;border-radius:999px">1 préstamo activo</span>
+                  </div>
+                </div>
+                <div class="sol-dates">
+                  <div>
+                    <span class="sol-label">Solicitado</span>
+                    <span class="sol-value">17 mar 2026</span>
+                  </div>
+                  <div>
+                    <span class="sol-label">Recojo previsto</span>
+                    <span class="sol-value">19 mar 2026</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sol-note">
+                <span class="sol-note-icon">💬</span>
+                <span>Necesito el libro para el lunes por el curso de Literatura.</span>
+              </div>
+              <div class="sol-card-footer">
+                <div class="sol-avail">
+                  <span>Ejemplar sugerido:</span>
+                  <strong>EJ-0077</strong>
+                  <span style="color:var(--ink-faint)">· Estante B-1</span>
+                </div>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-danger" onclick="openModalRechazo(this)">Rechazar</button>
+                  <button class="btn btn-primary" onclick="aprobar(this)">✓ Aprobar</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PENDIENTE 3 -->
+            <div class="sol-card is-pendiente" data-estado="pendiente">
+              <div class="sol-card-header">
+                <div class="sol-book-thumb" style="background:linear-gradient(155deg,#e0e7ff,#c7d2fe)"></div>
+                <div class="sol-book-info">
+                  <h3>El Aleph</h3>
+                  <p>Jorge Luis Borges · 863.44 BOR</p>
+                  <p style="margin-top:0.25em"><span class="stamp stamp-available" style="font-size:0.68rem">2 disponibles</span></p>
+                </div>
+                <span class="stamp stamp-pending" style="align-self:flex-start">Pendiente</span>
+              </div>
+              <div class="sol-card-body">
+                <div class="sol-student">
+                  <span class="sol-label">Estudiante</span>
+                  <div style="display:flex;align-items:center;gap:0.6em;margin-top:0.3em">
+                    <div class="student-avatar" style="background:#e0e7ff;color:#4338ca">AB</div>
+                    <div>
+                      <p style="margin:0;font-weight:600;font-size:var(--step1)">Ana Belén Soto</p>
+                      <p style="margin:0;font-size:0.75rem;color:var(--ink-soft)">ana.soto@instituto.edu.pe</p>
+                    </div>
+                  </div>
+                  <div style="margin-top:0.75em;display:flex;gap:0.5em;flex-wrap:wrap">
+                    <span style="font-size:0.72rem;background:var(--red-tint);color:var(--red);padding:0.15em 0.5em;border-radius:999px;font-weight:600">1 préstamo vencido</span>
+                    <span style="font-size:0.72rem;background:var(--surface-alt);color:var(--ink-soft);padding:0.15em 0.5em;border-radius:999px">3 préstamos activos</span>
+                  </div>
+                </div>
+                <div class="sol-dates">
+                  <div>
+                    <span class="sol-label">Solicitado</span>
+                    <span class="sol-value">16 mar 2026</span>
+                  </div>
+                  <div>
+                    <span class="sol-label">Recojo previsto</span>
+                    <span class="sol-value">18 mar 2026</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sol-note">
+                <span class="sol-note-icon">💬</span>
+                <span><em>Sin nota del estudiante.</em></span>
+              </div>
+              <div class="sol-card-footer">
+                <div class="sol-avail">
+                  <span style="color:var(--red);font-size:0.75rem">⚠ Estudiante con préstamo vencido</span>
+                </div>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-danger" onclick="openModalRechazo(this)">Rechazar</button>
+                  <button class="btn btn-primary" onclick="aprobar(this)">✓ Aprobar</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- APROBADA -->
+            <div class="sol-card is-aprobada" data-estado="aprobada">
+              <div class="sol-card-header">
+                <div class="sol-book-thumb"></div>
+                <div class="sol-book-info">
+                  <h3>Historia del Perú contemporáneo</h3>
+                  <p>Carlos Contreras · 985 CON</p>
+                </div>
+                <span class="stamp stamp-available" style="align-self:flex-start">Aprobada</span>
+              </div>
+              <div class="sol-card-body">
+                <div class="sol-student">
+                  <span class="sol-label">Estudiante</span>
+                  <div style="display:flex;align-items:center;gap:0.6em;margin-top:0.3em">
+                    <div class="student-avatar" style="background:#fce7f3;color:#be185d">KM</div>
+                    <div>
+                      <p style="margin:0;font-weight:600;font-size:var(--step1)">Karla Medina Solís</p>
+                      <p style="margin:0;font-size:0.75rem;color:var(--ink-soft)">karla.medina@instituto.edu.pe</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="sol-dates">
+                  <div>
+                    <span class="sol-label">Aprobado por</span>
+                    <span class="sol-value">Aldo Fernández</span>
+                  </div>
+                  <div>
+                    <span class="sol-label">Ejemplar asignado</span>
+                    <span class="sol-value" style="font-family:var(--font-mono)">EJ-0201</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sol-card-footer" style="justify-content:flex-end">
+                <span style="font-size:0.78rem;color:var(--green-dark);font-weight:500">✓ Pendiente de recojo en biblioteca</span>
+              </div>
+            </div>
+
+            <!-- RECHAZADA -->
+            <div class="sol-card is-rechazada" data-estado="rechazada">
+              <div class="sol-card-header">
+                <div class="sol-book-thumb" style="background:linear-gradient(155deg,var(--red-tint),#f9d0ca)"></div>
+                <div class="sol-book-info">
+                  <h3>Redes de computadoras</h3>
+                  <p>Andrew S. Tanenbaum · 004.6 TAN</p>
+                </div>
+                <span class="stamp stamp-overdue" style="align-self:flex-start">Rechazada</span>
+              </div>
+              <div class="sol-card-body">
+                <div class="sol-student">
+                  <span class="sol-label">Estudiante</span>
+                  <div style="display:flex;align-items:center;gap:0.6em;margin-top:0.3em">
+                    <div class="student-avatar" style="background:var(--surface-alt);color:var(--ink-soft)">JQ</div>
+                    <div>
+                      <p style="margin:0;font-weight:600;font-size:var(--step1)">Jhon Quispe Mamani</p>
+                      <p style="margin:0;font-size:0.75rem;color:var(--ink-soft)">jhon.quispe@instituto.edu.pe</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="sol-dates">
+                  <div>
+                    <span class="sol-label">Motivo de rechazo</span>
+                    <span class="sol-value" style="color:var(--red);font-size:0.8rem">Ejemplar reservado para uso en sala</span>
+                  </div>
+                </div>
+              </div>
+              <div class="sol-card-footer" style="justify-content:flex-end">
+                <span style="font-size:0.78rem;color:var(--red);font-weight:500">✕ Solicitud rechazada</span>
+              </div>
+            </div>
+
+          </div><!-- /sol-grid -->
+
+          <!-- Empty state (oculto por defecto) -->
+          <div class="empty-state" id="empty-state" style="display:none">
+            <p style="font-size:2rem;margin:0 0 0.5em">◉</p>
+            <h3>Sin solicitudes pendientes</h3>
+            <p style="margin:0">Todas las solicitudes han sido procesadas.</p>
+          </div>
+
+        </div><!-- /page -->
+      </div><!-- /content -->
+    </div><!-- /app-shell -->
+
+    <!-- MODAL: Aprobar — asignar ejemplar -->
+    <div class="modal-backdrop" id="modal-aprobar" role="dialog" aria-modal="true" aria-labelledby="modal-aprobar-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-aprobar-titulo">Aprobar solicitud</h2>
+          <button class="modal-close" onclick="closeModal('modal-aprobar')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <!-- Resumen -->
+          <div id="aprobar-resumen" style="background:var(--green-tint);border:1.5px solid var(--green);border-radius:var(--radius-s);padding:0.85em 1em;margin-bottom:1.3em;font-size:var(--step1)">
+            <strong id="aprobar-libro">—</strong>
+            <span style="color:var(--ink-soft)"> solicitado por </span>
+            <strong id="aprobar-estudiante">—</strong>
+          </div>
+          <div class="form-row form-row-2">
+            <div class="field">
+              <label for="apr-ejemplar">Ejemplar a asignar</label>
+              <select id="apr-ejemplar" required>
+                <option value="">Seleccionar…</option>
+                <option value="EJ-0105">EJ-0105 · Estante A-3 · Bueno</option>
+                <option value="EJ-0107">EJ-0107 · Estante A-3 · Nuevo</option>
+                <option value="EJ-0108">EJ-0108 · Estante A-3 · Bueno</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="apr-vence">Fecha de vencimiento</label>
+              <input type="date" id="apr-vence" required />
+              <span class="hint">14 días por defecto.</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="apr-obs">Observaciones (opcional)</label>
+            <textarea id="apr-obs" placeholder="Ej. entregar en mostrador principal…" style="min-height:4em"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-aprobar')">Cancelar</button>
+          <button class="btn btn-primary" onclick="confirmarAprobacion()">✓ Confirmar aprobación</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Rechazar -->
+    <div class="modal-backdrop" id="modal-rechazo" role="dialog" aria-modal="true" aria-labelledby="modal-rechazo-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-rechazo-titulo">Rechazar solicitud</h2>
+          <button class="modal-close" onclick="closeModal('modal-rechazo')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="rechazo-resumen" style="background:var(--red-tint);border:1.5px solid var(--red);border-radius:var(--radius-s);padding:0.85em 1em;margin-bottom:1.3em;font-size:var(--step1)">
+            <strong id="rechazo-libro">—</strong>
+            <span style="color:var(--ink-soft)"> solicitado por </span>
+            <strong id="rechazo-estudiante">—</strong>
+          </div>
+          <div class="field">
+            <label for="motivo-rechazo">Motivo del rechazo</label>
+            <select id="motivo-rechazo" required>
+              <option value="">Seleccionar motivo…</option>
+              <option>Ejemplar reservado para uso en sala</option>
+              <option>No hay ejemplares disponibles</option>
+              <option>El estudiante tiene préstamos vencidos</option>
+              <option>Límite de préstamos alcanzado</option>
+              <option>Otro motivo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="motivo-detalle">Detalle adicional (opcional)</label>
+            <textarea id="motivo-detalle" placeholder="Agrega más contexto para el estudiante…" style="min-height:4em"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-rechazo')">Cancelar</button>
+          <button class="btn btn-danger" onclick="confirmarRechazo()">✕ Confirmar rechazo</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let cardActiva = null;
+
+      // ---- Modales ----
+      function openModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(b => {
+        b.addEventListener('click', e => { if (e.target === b) closeModal(b.id); });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.is-open').forEach(m => closeModal(m.id));
+      });
+
+      // ---- Aprobar ----
+      function aprobar(btn) {
+        cardActiva = btn.closest('.sol-card');
+        const libro = cardActiva.querySelector('.sol-book-info h3').textContent;
+        const estudiante = cardActiva.querySelector('.sol-student p').textContent;
+        document.getElementById('aprobar-libro').textContent = libro;
+        document.getElementById('aprobar-estudiante').textContent = estudiante;
+        // Fecha vencimiento default +14 días
+        const d = new Date();
+        d.setDate(d.getDate() + 14);
+        document.getElementById('apr-vence').value = d.toISOString().split('T')[0];
+        openModal('modal-aprobar');
+      }
+
+      function confirmarAprobacion() {
+        const ejemplar = document.getElementById('apr-ejemplar').value;
+        if (!ejemplar) { document.getElementById('apr-ejemplar').focus(); return; }
+        // Actualizar card
+        cardActiva.dataset.estado = 'aprobada';
+        cardActiva.className = 'sol-card is-aprobada';
+        cardActiva.querySelector('.sol-card-header').style.background = 'var(--green-tint)';
+        const stamp = cardActiva.querySelector('.stamp');
+        stamp.textContent = 'Aprobada';
+        stamp.className = 'stamp stamp-available';
+        cardActiva.querySelector('.sol-card-footer').innerHTML =
+          '<span style="font-size:0.78rem;color:var(--green-dark);font-weight:500">✓ Aprobada — ejemplar ' + ejemplar + ' asignado</span>';
+        closeModal('modal-aprobar');
+        document.getElementById('apr-ejemplar').value = '';
+        document.getElementById('apr-obs').value = '';
+        cardActiva = null;
+        actualizarContadores();
+        aplicarFiltro();
+      }
+
+      // ---- Rechazar ----
+      function openModalRechazo(btn) {
+        cardActiva = btn.closest('.sol-card');
+        const libro = cardActiva.querySelector('.sol-book-info h3').textContent;
+        const estudiante = cardActiva.querySelector('.sol-student p').textContent;
+        document.getElementById('rechazo-libro').textContent = libro;
+        document.getElementById('rechazo-estudiante').textContent = estudiante;
+        openModal('modal-rechazo');
+      }
+
+      function confirmarRechazo() {
+        const motivo = document.getElementById('motivo-rechazo').value;
+        if (!motivo) { document.getElementById('motivo-rechazo').focus(); return; }
+        cardActiva.dataset.estado = 'rechazada';
+        cardActiva.className = 'sol-card is-rechazada';
+        cardActiva.querySelector('.sol-card-header').style.background = 'var(--red-tint)';
+        const stamp = cardActiva.querySelector('.stamp');
+        stamp.textContent = 'Rechazada';
+        stamp.className = 'stamp stamp-overdue';
+        cardActiva.querySelector('.sol-card-footer').innerHTML =
+          '<span style="font-size:0.78rem;color:var(--red);font-weight:500">✕ ' + motivo + '</span>';
+        closeModal('modal-rechazo');
+        document.getElementById('motivo-rechazo').value = '';
+        document.getElementById('motivo-detalle').value = '';
+        cardActiva = null;
+        actualizarContadores();
+        aplicarFiltro();
+      }
+
+      // ---- Contadores ----
+      function actualizarContadores() {
+        const cards = document.querySelectorAll('#sol-grid .sol-card');
+        let p = 0, a = 0, r = 0;
+        cards.forEach(c => {
+          if (c.dataset.estado === 'pendiente') p++;
+          else if (c.dataset.estado === 'aprobada') a++;
+          else if (c.dataset.estado === 'rechazada') r++;
+        });
+        document.getElementById('cnt-pendientes').textContent = p;
+        document.getElementById('cnt-aprobadas').textContent = a;
+        document.getElementById('cnt-rechazadas').textContent = r;
+        // Badge en sidebar (si existe)
+        const btns = document.querySelectorAll('[data-filter]');
+        btns.forEach(b => {
+          if (b.dataset.filter === 'pendiente') b.textContent = '⏳ Pendientes (' + p + ')';
+          if (b.dataset.filter === 'aprobada')  b.textContent = '✓ Aprobadas (' + a + ')';
+          if (b.dataset.filter === 'rechazada') b.textContent = '✕ Rechazadas (' + r + ')';
+        });
+        // Empty state
+        document.getElementById('empty-state').style.display = p === 0 && filtroActivo === 'pendiente' ? '' : 'none';
+      }
+
+      // ---- Filtros ----
+      let filtroActivo = 'pendiente';
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active', 'active-amber');
+          });
+          btn.classList.add('active');
+          if (btn.dataset.filter === 'pendiente') btn.classList.add('active-amber');
+          filtroActivo = btn.dataset.filter;
+          aplicarFiltro();
+        });
+      });
+
+      function aplicarFiltro() {
+        const cards = document.querySelectorAll('#sol-grid .sol-card');
+        let visibles = 0;
+        cards.forEach(card => {
+          const mostrar = filtroActivo === 'todas' || card.dataset.estado === filtroActivo;
+          card.style.display = mostrar ? '' : 'none';
+          if (mostrar) visibles++;
+        });
+        document.getElementById('empty-state').style.display = visibles === 0 ? '' : 'none';
+      }
+
+      // ---- Búsqueda ----
+      document.getElementById('buscar-sol').addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('#sol-grid .sol-card').forEach(card => {
+          const texto = card.textContent.toLowerCase();
+          card.style.display = texto.includes(q) ? '' : 'none';
+        });
+      });
+    </script>
+  </body>
+</html>

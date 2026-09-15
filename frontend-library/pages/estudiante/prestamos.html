@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mis préstamos · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <style>
+      .solicitud-card {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.2em;
+        align-items: center;
+        background: var(--surface-raised);
+        border: 1.5px solid var(--border);
+        border-left: 4px solid #d97706;
+        border-radius: var(--radius-m);
+        padding: 1em 1.3em;
+        transition: box-shadow var(--transition);
+      }
+      .solicitud-card:hover { box-shadow: var(--shadow-card); }
+      .solicitud-card.aprobada { border-left-color: var(--green); }
+      .solicitud-card.rechazada { border-left-color: var(--red); }
+      .solicitud-cover {
+        width: 3em; height: 4em;
+        border-radius: var(--radius-s);
+        background: linear-gradient(155deg, #fef3c7, #fde68a);
+        flex-shrink: 0;
+      }
+      .solicitud-card.aprobada .solicitud-cover {
+        background: linear-gradient(155deg, var(--green-tint), var(--surface-alt));
+      }
+      .solicitud-card.rechazada .solicitud-cover {
+        background: linear-gradient(155deg, var(--red-tint), #f9d0ca);
+      }
+      .solicitud-meta {
+        display: flex;
+        gap: 1.5em;
+        font-size: 0.8rem;
+        color: var(--ink-soft);
+        flex-wrap: wrap;
+        margin-top: 0.4em;
+      }
+      .solicitud-meta strong { color: var(--ink); display: block; font-family: var(--font-mono); }
+      .rechazo-reason {
+        font-size: 0.78rem;
+        color: var(--red);
+        margin-top: 0.3em;
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topnav">
+      <a href="catalogo.html" class="topnav-brand"><span class="mark">◧</span> Biblioteca</a>
+      <nav aria-label="Navegación de estudiante">
+        <ul class="topnav-links">
+          <li><a href="catalogo.html">Catálogo</a></li>
+          <li><a href="prestamos.html" aria-current="page">Mis préstamos</a></li>
+          <li><a href="../login.html">Salir</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="page" style="max-width:60rem;margin:0 auto">
+      <header style="margin-bottom:1.6em">
+        <p class="eyebrow">Micaela Ríos Paredes</p>
+        <h1>Mis préstamos</h1>
+        <p class="text-soft">Revisa tus solicitudes, préstamos activos y tu historial.</p>
+      </header>
+
+      <div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));margin-bottom:2em">
+        <div class="stat-card">
+          <span class="stat-value" style="color:#d97706">1</span>
+          <span class="stat-label">Solicitudes pendientes</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">2</span>
+          <span class="stat-label">Préstamos activos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">1</span>
+          <span class="stat-label">Renovación disponible</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">14</span>
+          <span class="stat-label">Libros leídos este año</span>
+        </div>
+      </div>
+
+      <!-- SOLICITUDES -->
+      <section aria-labelledby="solicitudes-titulo" style="margin-bottom:2.5em">
+        <h2 id="solicitudes-titulo" style="font-size:var(--step1);margin-bottom:1em">Solicitudes de préstamo</h2>
+        <div class="loan-list">
+
+          <!-- Pendiente -->
+          <article class="solicitud-card">
+            <div class="solicitud-cover" aria-hidden="true"></div>
+            <div>
+              <h3 style="margin:0 0 0.15em;font-size:var(--step1)">Cien años de soledad</h3>
+              <p style="margin:0 0 0.4em;font-size:0.8rem;color:var(--ink-soft)">Gabriel García Márquez · 863.44 GAR</p>
+              <div class="solicitud-meta">
+                <span>Solicitado<br /><strong>18 mar 2026</strong></span>
+                <span>Recojo previsto<br /><strong>20 mar 2026</strong></span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.6em">
+              <span class="stamp stamp-pending">Pendiente</span>
+              <button class="btn btn-quiet btn-danger" style="font-size:0.75rem;padding:0.3em 0.6em" onclick="cancelarSolicitud(this)">Cancelar</button>
+            </div>
+          </article>
+
+          <!-- Aprobada -->
+          <article class="solicitud-card aprobada">
+            <div class="solicitud-cover" aria-hidden="true"></div>
+            <div>
+              <h3 style="margin:0 0 0.15em;font-size:var(--step1)">El Aleph</h3>
+              <p style="margin:0 0 0.4em;font-size:0.8rem;color:var(--ink-soft)">Jorge Luis Borges · 863.44 BOR</p>
+              <div class="solicitud-meta">
+                <span>Solicitado<br /><strong>15 mar 2026</strong></span>
+                <span>Aprobado<br /><strong>16 mar 2026</strong></span>
+              </div>
+            </div>
+            <div>
+              <span class="stamp stamp-available">Aprobada</span>
+              <p style="font-size:0.75rem;color:var(--green-dark);margin:0.4em 0 0;text-align:right">Recoge en biblioteca</p>
+            </div>
+          </article>
+
+          <!-- Rechazada -->
+          <article class="solicitud-card rechazada">
+            <div class="solicitud-cover" aria-hidden="true"></div>
+            <div>
+              <h3 style="margin:0 0 0.15em;font-size:var(--step1)">Redes de computadoras</h3>
+              <p style="margin:0 0 0.4em;font-size:0.8rem;color:var(--ink-soft)">Andrew S. Tanenbaum · 004.6 TAN</p>
+              <div class="solicitud-meta">
+                <span>Solicitado<br /><strong>10 mar 2026</strong></span>
+                <span>Revisado<br /><strong>11 mar 2026</strong></span>
+              </div>
+              <p class="rechazo-reason">⚠ Motivo: ejemplar reservado para uso en sala.</p>
+            </div>
+            <div><span class="stamp stamp-overdue">Rechazada</span></div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- PRÉSTAMOS ACTIVOS -->
+      <section aria-labelledby="activos-titulo" style="margin-bottom:2.5em">
+        <h2 id="activos-titulo" style="font-size:var(--step1);margin-bottom:1em">Préstamos activos</h2>
+        <div class="loan-list">
+          <article class="loan-ticket">
+            <div class="ticket-cover" aria-hidden="true"></div>
+            <div>
+              <h3 style="margin:0 0 0.3em">La ciudad y los perros</h3>
+              <p class="text-soft" style="margin:0 0 0.5em;font-size:0.8rem">Mario Vargas Llosa · EJ-0231</p>
+              <div class="ticket-dates">
+                <span>Prestado<br /><strong>10 mar 2026</strong></span>
+                <span>Vence<br /><strong>24 mar 2026</strong></span>
+              </div>
+            </div>
+            <div><span class="stamp stamp-loaned">Prestado</span></div>
+          </article>
+          <article class="loan-ticket is-overdue">
+            <div class="ticket-cover" aria-hidden="true"></div>
+            <div>
+              <h3 style="margin:0 0 0.3em">Cien años de soledad</h3>
+              <p class="text-soft" style="margin:0 0 0.5em;font-size:0.8rem">Gabriel García Márquez · EJ-0104</p>
+              <div class="ticket-dates">
+                <span>Prestado<br /><strong>02 mar 2026</strong></span>
+                <span>Venció<br /><strong>16 mar 2026</strong></span>
+              </div>
+            </div>
+            <div><span class="stamp stamp-overdue">Vencido</span></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- HISTORIAL -->
+      <section aria-labelledby="historial-titulo">
+        <h2 id="historial-titulo" style="font-size:var(--step1);margin-bottom:1em">Historial de préstamos</h2>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Libro</th>
+                  <th scope="col">Prestado</th>
+                  <th scope="col">Devuelto</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="cell-title">Los ríos profundos</td>
+                  <td>02 feb 2026</td>
+                  <td>15 feb 2026</td>
+                  <td><span class="stamp stamp-available">Devuelto</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-title">El Aleph</td>
+                  <td>10 ene 2026</td>
+                  <td>22 ene 2026</td>
+                  <td><span class="stamp stamp-available">Devuelto</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-title">Redes de computadoras</td>
+                  <td>05 dic 2025</td>
+                  <td>18 dic 2025</td>
+                  <td><span class="stamp stamp-available">Devuelto</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span>Mostrando 1–3 de 14</span>
+            <div style="display:flex;gap:0.5em">
+              <button class="btn btn-secondary" disabled>Anterior</button>
+              <button class="btn btn-secondary">Siguiente</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function cancelarSolicitud(btn) {
+        const card = btn.closest('.solicitud-card');
+        card.style.opacity = '0.5';
+        card.style.pointerEvents = 'none';
+        const stamp = card.querySelector('.stamp');
+        stamp.textContent = 'Cancelada';
+        stamp.className = 'stamp stamp-lost';
+        btn.remove();
+      }
+    </script>
+  </body>
+</html>

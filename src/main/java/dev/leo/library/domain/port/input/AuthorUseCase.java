@@ -3,7 +3,6 @@ package dev.leo.library.domain.port.input;
 import dev.leo.library.application.dto.request.AuthorRequest;
 import dev.leo.library.application.dto.response.AuthorResponse;
 import dev.leo.library.application.dto.response.SelectOptionsResponse.SelectItem;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.AuthorEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import java.util.List;
 
@@ -16,5 +15,4 @@ public interface AuthorUseCase {
     void activate(Long id);
     void deactivate(Long id);
     void delete(Long id);
-    AuthorEntity findEntityById(Long id);
 }

@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuarios · Administrador · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Administrador</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="usuarios.html" aria-current="page"><span class="icon">☺</span> Usuarios</a></li>
+            <li><a href="reportes.html"><span class="icon">▦</span> Reportes</a></li>
+            <li><a href="catalogo-vista.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Usuarios</h1>
+          </div>
+          <div class="user-chip">
+            <span class="topbar-meta">Administrador</span>
+            <span class="avatar" aria-hidden="true">RC</span>
+            <span>Rosa Castillo</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <header>
+            <p class="text-soft">Administra las cuentas de administradores, bibliotecarios y estudiantes.</p>
+          </header>
+
+          <div class="tabs" role="tablist" aria-label="Filtrar por rol">
+            <a href="#" aria-current="page" role="tab">Todos (356)</a>
+            <a href="#" role="tab">Administradores (3)</a>
+            <a href="#" role="tab">Bibliotecarios (8)</a>
+            <a href="#" role="tab">Estudiantes (345)</a>
+          </div>
+
+          <section class="table-card" aria-label="Listado de usuarios">
+            <div class="table-card-head">
+              <form class="search-row" role="search" action="#">
+                <label for="buscar-usuario" class="sr-only">Buscar usuario</label>
+                <input type="search" id="buscar-usuario" name="q" placeholder="Buscar por nombre o correo…" />
+                <select aria-label="Filtrar por estado">
+                  <option>Todos los estados</option>
+                  <option>Activos</option>
+                  <option>Inactivos</option>
+                </select>
+                <button type="submit" class="btn btn-secondary">Buscar</button>
+              </form>
+              <button class="btn btn-primary" onclick="openModal('modal-usuario')">+ Nuevo usuario</button>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Correo</th>
+                    <th scope="col">Rol</th>
+                    <th scope="col">Registro</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col"><span class="sr-only">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="cell-title">Micaela Ríos Paredes</td>
+                    <td>micaela.rios@instituto.edu.pe</td>
+                    <td>Estudiante</td>
+                    <td>04 ene 2025</td>
+                    <td><span class="stamp stamp-available">Activo</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-usuario')">Editar</button><button class="btn btn-quiet">Desactivar</button></div></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-title">Aldo Fernández Rivas</td>
+                    <td>aldo.fernandez@instituto.edu.pe</td>
+                    <td>Bibliotecario</td>
+                    <td>19 ago 2024</td>
+                    <td><span class="stamp stamp-available">Activo</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-usuario')">Editar</button><button class="btn btn-quiet">Desactivar</button></div></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-title">Jhon Quispe Mamani</td>
+                    <td>jhon.quispe@instituto.edu.pe</td>
+                    <td>Estudiante</td>
+                    <td>22 feb 2025</td>
+                    <td><span class="stamp stamp-lost">Inactivo</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-usuario')">Editar</button><button class="btn btn-quiet">Reactivar</button></div></td>
+                  </tr>
+                  <tr>
+                    <td class="cell-title">Rosa Castillo Vega</td>
+                    <td>rosa.castillo@instituto.edu.pe</td>
+                    <td>Administrador</td>
+                    <td>11 mar 2023</td>
+                    <td><span class="stamp stamp-available">Activo</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-usuario')">Editar</button><button class="btn btn-quiet">Desactivar</button></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <span>Mostrando 1–4 de 356</span>
+              <div style="display:flex;gap:0.5em">
+                <button class="btn btn-secondary" disabled>Anterior</button>
+                <button class="btn btn-secondary">Siguiente</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Nuevo / Editar Usuario -->
+    <div class="modal-backdrop" id="modal-usuario" role="dialog" aria-modal="true" aria-labelledby="modal-usuario-titulo">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <h2 id="modal-usuario-titulo">Registrar usuario</h2>
+          <button class="modal-close" onclick="closeModal('modal-usuario')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-usuario" action="#" method="post" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="usr-nombre">Nombres</label>
+                <input type="text" id="usr-nombre" name="nombres" placeholder="Ej. Micaela" required />
+              </div>
+              <div class="field">
+                <label for="usr-apellido">Apellidos</label>
+                <input type="text" id="usr-apellido" name="apellidos" placeholder="Ej. Ríos Paredes" required />
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="usr-correo">Correo institucional</label>
+                <input type="email" id="usr-correo" name="correo" placeholder="nombre@instituto.edu.pe" required />
+              </div>
+              <div class="field">
+                <label for="usr-rol">Rol</label>
+                <select id="usr-rol" name="rol" required>
+                  <option value="">Seleccionar rol…</option>
+                  <option value="ESTUDIANTE">Estudiante</option>
+                  <option value="BIBLIOTECARIO">Bibliotecario</option>
+                  <option value="ADMINISTRADOR">Administrador</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="usr-codigo">Código de estudiante</label>
+                <input type="text" id="usr-codigo" name="codigo" placeholder="Ej. 2024-0123" />
+                <span class="hint">Solo para estudiantes.</span>
+              </div>
+              <div class="field">
+                <label for="usr-telefono">Teléfono</label>
+                <input type="tel" id="usr-telefono" name="telefono" placeholder="Ej. 987 654 321" />
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="usr-password">Contraseña inicial</label>
+                <input type="password" id="usr-password" name="password" placeholder="Mínimo 8 caracteres" required />
+              </div>
+              <div class="field">
+                <label for="usr-estado">Estado</label>
+                <select id="usr-estado" name="estado">
+                  <option value="ACTIVO">Activo</option>
+                  <option value="INACTIVO">Inactivo</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-usuario')">Cancelar</button>
+          <button class="btn btn-primary" form="form-usuario" type="submit">Guardar usuario</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', e => {
+          if (e.target === backdrop) closeModal(backdrop.id);
+        });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop.is-open').forEach(m => closeModal(m.id));
+        }
+      });
+    </script>
+  </body>
+</html>

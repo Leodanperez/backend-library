@@ -45,7 +45,6 @@ public class AuthorService implements AuthorUseCase {
         return PaginatedResponse.of(mapped, page, perPage, result.getTotalElements());
     }
 
-    @Override
     public AuthorEntity findEntityById(Long id) {
         return repository.findById(id).orElseThrow(() -> new AuthorNotFoundException(id));
     }

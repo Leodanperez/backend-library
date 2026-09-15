@@ -80,7 +80,6 @@ public class BookService implements BookUseCase {
         return repository.findBookIdsWithAvailableCopies(bookIds);
     }
 
-    @Override
     public BookEntity findEntityById(Long id) {
         return repository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
     }

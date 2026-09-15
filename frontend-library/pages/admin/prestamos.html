@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Préstamos · Administrador · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Administrador</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="usuarios.html"><span class="icon">☺</span> Usuarios</a></li>
+            <li><a href="libros.html"><span class="icon">▥</span> Catálogo</a></li>
+            <li><a href="prestamos.html" aria-current="page"><span class="icon">▦</span> Préstamos</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Préstamos</h1>
+          </div>
+          <div class="user-chip">
+            <span class="topbar-meta">Administrador</span>
+            <span class="avatar" aria-hidden="true">RC</span>
+            <span>Rosa Castillo</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <header>
+            <p class="text-soft">Panorama de todos los préstamos registrados por el equipo de bibliotecarios.</p>
+          </header>
+
+          <div class="stat-grid">
+            <div class="stat-card">
+              <span class="stat-value">142</span>
+              <span class="stat-label">Activos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" style="color:var(--red)">18</span>
+              <span class="stat-label">Vencidos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">2,940</span>
+              <span class="stat-label">Devueltos este año</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">3.2</span>
+              <span class="stat-label">Días de retraso promedio</span>
+            </div>
+          </div>
+
+          <nav class="tabs" aria-label="Filtrar préstamos">
+            <a href="#" aria-current="page">Todos</a>
+            <a href="#">Activos</a>
+            <a href="#">Vencidos</a>
+            <a href="#">Devueltos</a>
+          </nav>
+
+          <section class="table-card" aria-label="Listado de préstamos">
+            <div class="table-card-head">
+              <form class="search-row" role="search" action="#">
+                <label for="buscar-prestamo" class="sr-only">Buscar préstamo</label>
+                <input type="search" id="buscar-prestamo" name="q" placeholder="Buscar por usuario o libro…" />
+                <input type="date" aria-label="Desde" />
+                <input type="date" aria-label="Hasta" />
+                <button type="submit" class="btn btn-secondary">Filtrar</button>
+              </form>
+              <div style="display:flex;gap:0.5em">
+                <button class="btn btn-secondary">Exportar CSV</button>
+                <button class="btn btn-primary" onclick="openModal('modal-prestamo')">+ Nuevo préstamo</button>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Libro / ejemplar</th>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Bibliotecario</th>
+                    <th scope="col">Préstamo</th>
+                    <th scope="col">Vence</th>
+                    <th scope="col">Renovaciones</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">EJ-0104</span></td>
+                    <td>Jhon Quispe Mamani</td>
+                    <td>Aldo Fernández</td>
+                    <td>02 mar 2026</td>
+                    <td>16 mar 2026</td>
+                    <td>0</td>
+                    <td><span class="stamp stamp-overdue">Vencido</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">EJ-0231</span></td>
+                    <td>Micaela Ríos Paredes</td>
+                    <td>Aldo Fernández</td>
+                    <td>10 mar 2026</td>
+                    <td>24 mar 2026</td>
+                    <td>1</td>
+                    <td><span class="stamp stamp-loaned">Prestado</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">Redes de computadoras</span><span class="cell-sub">EJ-0489</span></td>
+                    <td>Fabrizio Torres Luna</td>
+                    <td>Diana Salas</td>
+                    <td>15 mar 2026</td>
+                    <td>29 mar 2026</td>
+                    <td>0</td>
+                    <td><span class="stamp stamp-loaned">Prestado</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">Los ríos profundos</span><span class="cell-sub">EJ-0077</span></td>
+                    <td>Ana Belén Soto</td>
+                    <td>Diana Salas</td>
+                    <td>20 feb 2026</td>
+                    <td>06 mar 2026</td>
+                    <td>0</td>
+                    <td><span class="stamp stamp-available">Devuelto</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <span>Mostrando 1–4 de 3,100</span>
+              <div style="display:flex;gap:0.5em">
+                <button class="btn btn-secondary" disabled>Anterior</button>
+                <button class="btn btn-secondary">Siguiente</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Nuevo Préstamo -->
+    <div class="modal-backdrop" id="modal-prestamo" role="dialog" aria-modal="true" aria-labelledby="modal-prestamo-titulo">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <h2 id="modal-prestamo-titulo">Registrar préstamo</h2>
+          <button class="modal-close" onclick="closeModal('modal-prestamo')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-prestamo" action="#" method="post" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="p-ejemplar">Código de ejemplar</label>
+                <input type="text" id="p-ejemplar" name="codigo_ejemplar" placeholder="Ej. EJ-0231" required />
+                <span class="hint">Escribe o escanea el código de la copia física.</span>
+              </div>
+              <div class="field">
+                <label for="p-usuario">Usuario</label>
+                <input type="text" id="p-usuario" name="usuario" placeholder="Nombre, código o correo del estudiante" required />
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="p-fecha-prestamo">Fecha de préstamo</label>
+                <input type="date" id="p-fecha-prestamo" name="fecha_prestamo" required />
+              </div>
+              <div class="field">
+                <label for="p-fecha-vence">Fecha de vencimiento</label>
+                <input type="date" id="p-fecha-vence" name="fecha_vencimiento" required />
+                <span class="hint">Por defecto, 14 días desde el préstamo.</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="p-observaciones">Observaciones (opcional)</label>
+              <textarea id="p-observaciones" name="observaciones" placeholder="Ej. entregado con rasgadura leve en la portada"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-prestamo')">Cancelar</button>
+          <button class="btn btn-primary" form="form-prestamo" type="submit">Confirmar préstamo</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', e => {
+          if (e.target === backdrop) closeModal(backdrop.id);
+        });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop.is-open').forEach(m => closeModal(m.id));
+        }
+      });
+    </script>
+  </body>
+</html>

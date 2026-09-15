@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <header class="topnav">
+      <a href="catalogo.html" class="topnav-brand"><span class="mark">◧</span> Biblioteca</a>
+      <nav aria-label="Navegación de estudiante">
+        <ul class="topnav-links">
+          <li><a href="catalogo.html" aria-current="page">Catálogo</a></li>
+          <li><a href="prestamos.html">Mis préstamos</a></li>
+          <li><a href="../login.html">Salir</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="page" style="max-width:78rem;margin:0 auto">
+      <header style="margin-bottom:1.4em">
+        <p class="eyebrow">Bienvenida, Micaela</p>
+        <h1>Explora el catálogo</h1>
+        <p class="text-soft">Busca por título, autor o categoría y revisa la disponibilidad antes de solicitar un préstamo.</p>
+      </header>
+
+      <form class="search-row" role="search" action="#" style="margin-bottom:1.6em">
+        <label for="buscar-estudiante" class="sr-only">Buscar libro</label>
+        <input type="search" id="buscar-estudiante" name="q" placeholder="Buscar título, autor o tema…" style="flex:1;min-width:14rem" />
+        <select aria-label="Filtrar por categoría">
+          <option>Todas las categorías</option>
+          <option>Literatura</option>
+          <option>Ingeniería de software</option>
+          <option>Historia</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+      </form>
+
+      <section class="book-grid" aria-label="Resultados del catálogo">
+
+        <article class="book-card">
+          <a href="libro-detalle.html" style="text-decoration:none;color:inherit;display:contents">
+            <div class="book-cover"><span class="call-number">863.44 GAR</span></div>
+          </a>
+          <div class="book-body">
+            <p class="book-cat">Literatura</p>
+            <h3><a href="libro-detalle.html" style="text-decoration:none;color:inherit">Cien años de soledad</a></h3>
+            <p class="book-author">Gabriel García Márquez</p>
+            <div class="book-foot">
+              <span class="stamp stamp-available">Disponible</span>
+              <a href="libro-detalle.html" class="btn btn-primary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><span class="call-number">863.44 VAR</span></div>
+          <div class="book-body">
+            <p class="book-cat">Literatura</p>
+            <h3>La ciudad y los perros</h3>
+            <p class="book-author">Mario Vargas Llosa</p>
+            <div class="book-foot">
+              <span class="stamp stamp-loaned">Agotado</span>
+              <a href="libro-detalle.html" class="btn btn-secondary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><span class="call-number">004.6 TAN</span></div>
+          <div class="book-body">
+            <p class="book-cat">Ingeniería de software</p>
+            <h3>Redes de computadoras</h3>
+            <p class="book-author">Andrew S. Tanenbaum</p>
+            <div class="book-foot">
+              <span class="stamp stamp-available">Disponible</span>
+              <a href="libro-detalle.html" class="btn btn-primary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><span class="call-number">863.44 ARG</span></div>
+          <div class="book-body">
+            <p class="book-cat">Literatura</p>
+            <h3>Los ríos profundos</h3>
+            <p class="book-author">José María Arguedas</p>
+            <div class="book-foot">
+              <span class="stamp stamp-available">Disponible</span>
+              <a href="libro-detalle.html" class="btn btn-primary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><span class="call-number">863.44 BOR</span></div>
+          <div class="book-body">
+            <p class="book-cat">Literatura</p>
+            <h3>El Aleph</h3>
+            <p class="book-author">Jorge Luis Borges</p>
+            <div class="book-foot">
+              <span class="stamp stamp-available">Disponible</span>
+              <a href="libro-detalle.html" class="btn btn-primary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="book-card">
+          <div class="book-cover"><span class="call-number">985 CON</span></div>
+          <div class="book-body">
+            <p class="book-cat">Historia</p>
+            <h3>Historia del Perú contemporáneo</h3>
+            <p class="book-author">Carlos Contreras</p>
+            <div class="book-foot">
+              <span class="stamp stamp-available">Disponible</span>
+              <a href="libro-detalle.html" class="btn btn-primary" style="padding:0.35em 0.8em;font-size:0.75rem">Ver detalle</a>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <nav class="pagination" aria-label="Paginación" style="margin-top:1.5em;border:1.5px solid var(--border);border-radius:var(--radius-m)">
+        <span>Mostrando 1–6 de 1,284</span>
+        <div style="display:flex;gap:0.5em">
+          <button class="btn btn-secondary" disabled>Anterior</button>
+          <button class="btn btn-secondary">Siguiente</button>
+        </div>
+      </nav>
+    </main>
+  </body>
+</html>

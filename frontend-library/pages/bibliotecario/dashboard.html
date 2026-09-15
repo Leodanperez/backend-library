@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel · Bibliotecario · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Bibliotecario</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html" aria-current="page"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="solicitudes.html"><span class="icon">◉</span> Solicitudes</a></li>
+            <li><a href="prestamos.html"><span class="icon">▦</span> Préstamos</a></li>
+            <li><a href="catalogo.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Panel</h1>
+          </div>
+          <div class="user-chip">
+            <span class="avatar" aria-hidden="true">AF</span>
+            <span>Aldo Fernández</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <div class="stat-grid">
+            <div class="stat-card">
+              <span class="stat-value" style="color:#d97706">3</span>
+              <span class="stat-label">Solicitudes pendientes</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">37</span>
+              <span class="stat-label">Préstamos hoy</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">142</span>
+              <span class="stat-label">Préstamos activos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" style="color:var(--red)">18</span>
+              <span class="stat-label">Vencidos por gestionar</span>
+            </div>
+          </div>
+
+          <section aria-labelledby="acciones-titulo" style="margin-bottom:2em">
+            <h2 id="acciones-titulo" style="font-size:var(--step1);margin-bottom:1em">Acciones frecuentes</h2>
+            <div class="stat-grid">
+              <a href="solicitudes.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <h3>Revisar solicitudes</h3>
+                <p class="text-soft" style="margin:0">Aprueba o rechaza las solicitudes de préstamo enviadas por estudiantes.</p>
+              </a>
+              <a href="prestamos.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <h3>Registrar préstamo</h3>
+                <p class="text-soft" style="margin:0">Escanea o busca un ejemplar para prestarlo a un estudiante.</p>
+              </a>
+              <a href="prestamos.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <h3>Registrar devolución</h3>
+                <p class="text-soft" style="margin:0">Marca un ejemplar como devuelto y libera su disponibilidad.</p>
+              </a>
+              <a href="catalogo.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <h3>Consultar disponibilidad</h3>
+                <p class="text-soft" style="margin:0">Verifica cuántos ejemplares de un título quedan en estante.</p>
+              </a>
+            </div>
+          </section>
+
+          <section class="table-card" aria-label="Préstamos vencidos">
+            <div class="table-card-head">
+              <h2 style="margin:0;font-size:var(--step1)">Vencidos que requieren seguimiento</h2>
+              <a href="prestamos.html" class="btn btn-secondary">Ver todos</a>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Libro</th>
+                    <th scope="col">Venció</th>
+                    <th scope="col">Días de atraso</th>
+                    <th scope="col"><span class="sr-only">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Jhon Quispe Mamani</td>
+                    <td>Cien años de soledad</td>
+                    <td>16 mar 2026</td>
+                    <td><span style="color:var(--red);font-weight:600">2 días</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet">Contactar</button></div></td>
+                  </tr>
+                  <tr>
+                    <td>Karla Medina Solís</td>
+                    <td>El Aleph</td>
+                    <td>08 mar 2026</td>
+                    <td><span style="color:var(--red);font-weight:600">10 días</span></td>
+                    <td><div class="row-actions"><button class="btn btn-quiet">Contactar</button></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

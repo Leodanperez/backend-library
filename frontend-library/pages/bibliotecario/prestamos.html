@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Préstamos · Bibliotecario · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Bibliotecario</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="solicitudes.html"><span class="icon">◉</span> Solicitudes</a></li>
+            <li><a href="prestamos.html" aria-current="page"><span class="icon">▦</span> Préstamos</a></li>
+            <li><a href="catalogo.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Préstamos</h1>
+          </div>
+          <div class="user-chip">
+            <span class="avatar" aria-hidden="true">AF</span>
+            <span>Aldo Fernández</span>
+          </div>
+        </header>
+
+        <div class="page">
+
+          <!-- Tabs -->
+          <nav class="tabs" aria-label="Secciones de préstamos" id="tabs-nav">
+            <a href="#" class="tab-link" data-tab="solicitudes" aria-current="page">
+              Solicitudes
+              <span style="background:#d97706;color:#fff;font-family:var(--font-mono);font-size:0.68rem;font-weight:700;padding:0.1em 0.45em;border-radius:999px;margin-left:0.35em" id="badge-solicitudes">3</span>
+            </a>
+            <a href="#" class="tab-link" data-tab="activos">Activos (142)</a>
+            <a href="#" class="tab-link" data-tab="vencidos">Vencidos (18)</a>
+            <a href="#" class="tab-link" data-tab="devueltos">Devueltos hoy (9)</a>
+          </nav>
+
+          <!-- PANEL: Solicitudes pendientes -->
+          <div id="panel-solicitudes">
+            <div class="table-card">
+              <div class="table-card-head">
+                <div>
+                  <p style="margin:0;font-weight:600;font-size:var(--step1)">Solicitudes de préstamo pendientes</p>
+                  <p style="margin:0.1em 0 0;font-size:0.78rem;color:var(--ink-soft)">Revisa cada solicitud y aprueba o rechaza según disponibilidad.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal('modal-prestamo')">+ Nuevo préstamo</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Libro</th>
+                      <th scope="col">Estudiante</th>
+                      <th scope="col">Solicitado</th>
+                      <th scope="col">Recojo previsto</th>
+                      <th scope="col">Nota</th>
+                      <th scope="col">Estado</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabla-solicitudes">
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">863.44 GAR · 4 disponibles</span></td>
+                      <td>Micaela Ríos Paredes<span class="cell-sub">micaela.rios@instituto.edu.pe</span></td>
+                      <td>18 mar 2026</td>
+                      <td>20 mar 2026</td>
+                      <td style="max-width:12rem;font-size:0.78rem;color:var(--ink-soft)">—</td>
+                      <td><span class="stamp stamp-pending">Pendiente</span></td>
+                      <td>
+                        <div class="row-actions">
+                          <button class="btn btn-primary" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="aprobar(this)">Aprobar</button>
+                          <button class="btn btn-danger" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="openModalRechazo(this)">Rechazar</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Los ríos profundos</span><span class="cell-sub">863.44 ARG · 1 disponible</span></td>
+                      <td>Fabrizio Torres Luna<span class="cell-sub">fabrizio.torres@instituto.edu.pe</span></td>
+                      <td>17 mar 2026</td>
+                      <td>19 mar 2026</td>
+                      <td style="max-width:12rem;font-size:0.78rem;color:var(--ink-soft)">Necesito para el lunes por Literatura.</td>
+                      <td><span class="stamp stamp-pending">Pendiente</span></td>
+                      <td>
+                        <div class="row-actions">
+                          <button class="btn btn-primary" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="aprobar(this)">Aprobar</button>
+                          <button class="btn btn-danger" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="openModalRechazo(this)">Rechazar</button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">El Aleph</span><span class="cell-sub">863.44 BOR · 2 disponibles</span></td>
+                      <td>Ana Belén Soto<span class="cell-sub">ana.soto@instituto.edu.pe</span></td>
+                      <td>16 mar 2026</td>
+                      <td>18 mar 2026</td>
+                      <td style="max-width:12rem;font-size:0.78rem;color:var(--ink-soft)">—</td>
+                      <td><span class="stamp stamp-pending">Pendiente</span></td>
+                      <td>
+                        <div class="row-actions">
+                          <button class="btn btn-primary" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="aprobar(this)">Aprobar</button>
+                          <button class="btn btn-danger" style="font-size:0.75rem;padding:0.4em 0.8em" onclick="openModalRechazo(this)">Rechazar</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Activos -->
+          <div id="panel-activos" style="display:none">
+            <div class="table-card">
+              <div class="table-card-head">
+                <form class="search-row" role="search" action="#">
+                  <label for="buscar" class="sr-only">Buscar préstamo</label>
+                  <input type="search" id="buscar" name="q" placeholder="Buscar por usuario, libro o código…" />
+                  <button type="submit" class="btn btn-secondary">Buscar</button>
+                </form>
+                <button class="btn btn-primary" onclick="openModal('modal-prestamo')">+ Nuevo préstamo</button>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Ejemplar</th>
+                      <th scope="col">Usuario</th>
+                      <th scope="col">Préstamo</th>
+                      <th scope="col">Vence</th>
+                      <th scope="col">Renovaciones</th>
+                      <th scope="col">Estado</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">EJ-0231</span></td>
+                      <td>Micaela Ríos Paredes</td>
+                      <td>10 mar 2026</td>
+                      <td>24 mar 2026</td>
+                      <td>1 de 2</td>
+                      <td><span class="stamp stamp-loaned">Prestado</span></td>
+                      <td><div class="row-actions"><button class="btn btn-secondary">Renovar</button><button class="btn btn-primary">Devolver</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">EJ-0104</span></td>
+                      <td>Jhon Quispe Mamani</td>
+                      <td>02 mar 2026</td>
+                      <td>16 mar 2026</td>
+                      <td>0 de 2</td>
+                      <td><span class="stamp stamp-overdue">Vencido</span></td>
+                      <td><div class="row-actions"><button class="btn btn-secondary">Renovar</button><button class="btn btn-primary">Devolver</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–2 de 142</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Vencidos -->
+          <div id="panel-vencidos" style="display:none">
+            <div class="table-card">
+              <div class="table-card-head">
+                <p style="margin:0;font-weight:600;font-size:var(--step1)">Préstamos vencidos</p>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Ejemplar</th>
+                      <th scope="col">Usuario</th>
+                      <th scope="col">Venció</th>
+                      <th scope="col">Días de atraso</th>
+                      <th scope="col"><span class="sr-only">Acciones</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">EJ-0104</span></td>
+                      <td>Jhon Quispe Mamani</td>
+                      <td>16 mar 2026</td>
+                      <td><span style="color:var(--red);font-weight:600">2 días</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet">Contactar</button><button class="btn btn-primary">Devolver</button></div></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">El Aleph</span><span class="cell-sub">EJ-0312</span></td>
+                      <td>Karla Medina Solís</td>
+                      <td>08 mar 2026</td>
+                      <td><span style="color:var(--red);font-weight:600">10 días</span></td>
+                      <td><div class="row-actions"><button class="btn btn-quiet">Contactar</button><button class="btn btn-primary">Devolver</button></div></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL: Devueltos hoy -->
+          <div id="panel-devueltos" style="display:none">
+            <div class="table-card">
+              <div class="table-card-head">
+                <p style="margin:0;font-weight:600;font-size:var(--step1)">Devueltos hoy</p>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Ejemplar</th>
+                      <th scope="col">Usuario</th>
+                      <th scope="col">Prestado</th>
+                      <th scope="col">Devuelto</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">Los ríos profundos</span><span class="cell-sub">EJ-0077</span></td>
+                      <td>Ana Belén Soto</td>
+                      <td>04 mar 2026</td>
+                      <td>18 mar 2026</td>
+                      <td><span class="stamp stamp-available">Devuelto</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /page -->
+      </div><!-- /content -->
+    </div><!-- /app-shell -->
+
+    <!-- MODAL: Nuevo Préstamo -->
+    <div class="modal-backdrop" id="modal-prestamo" role="dialog" aria-modal="true" aria-labelledby="modal-prestamo-titulo">
+      <div class="modal modal-wide">
+        <div class="modal-header">
+          <h2 id="modal-prestamo-titulo">Registrar nuevo préstamo</h2>
+          <button class="modal-close" onclick="closeModal('modal-prestamo')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <form id="form-prestamo" action="#" method="post" novalidate>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="codigo-ejemplar">Código de ejemplar</label>
+                <input type="text" id="codigo-ejemplar" name="codigo_ejemplar" placeholder="Ej. EJ-0231" required />
+                <span class="hint">Escribe o escanea el código impreso en la copia física.</span>
+              </div>
+              <div class="field">
+                <label for="usuario-prestamo">Usuario</label>
+                <input type="text" id="usuario-prestamo" name="usuario" placeholder="Nombre, código o correo del estudiante" required />
+              </div>
+            </div>
+            <div class="form-row form-row-2">
+              <div class="field">
+                <label for="fecha-prestamo">Fecha de préstamo</label>
+                <input type="date" id="fecha-prestamo" name="fecha_prestamo" required />
+              </div>
+              <div class="field">
+                <label for="fecha-vencimiento">Fecha de vencimiento</label>
+                <input type="date" id="fecha-vencimiento" name="fecha_vencimiento" required />
+                <span class="hint">Por defecto, 14 días desde el préstamo.</span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="observaciones">Observaciones (opcional)</label>
+              <textarea id="observaciones" name="observaciones" placeholder="Ej. entregado con rasgadura leve en la portada"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-prestamo')">Cancelar</button>
+          <button class="btn btn-primary" form="form-prestamo" type="submit">Confirmar préstamo</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: Rechazar solicitud -->
+    <div class="modal-backdrop" id="modal-rechazo" role="dialog" aria-modal="true" aria-labelledby="modal-rechazo-titulo">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 id="modal-rechazo-titulo">Rechazar solicitud</h2>
+          <button class="modal-close" onclick="closeModal('modal-rechazo')" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:var(--step1);margin-bottom:1.2em;color:var(--ink-soft)">Indica el motivo del rechazo para que el estudiante pueda entender la decisión.</p>
+          <div class="field">
+            <label for="motivo-rechazo">Motivo del rechazo</label>
+            <select id="motivo-rechazo">
+              <option value="">Seleccionar motivo…</option>
+              <option>Ejemplar reservado para uso en sala</option>
+              <option>No hay ejemplares disponibles</option>
+              <option>El estudiante tiene préstamos vencidos</option>
+              <option>Límite de préstamos alcanzado</option>
+              <option>Otro motivo</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="motivo-detalle">Detalle adicional (opcional)</label>
+            <textarea id="motivo-detalle" placeholder="Agrega más contexto si es necesario…" style="min-height:4em"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeModal('modal-rechazo')">Cancelar</button>
+          <button class="btn btn-danger" onclick="confirmarRechazo()">Confirmar rechazo</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Tabs ---
+      let filaRechazo = null;
+
+      document.querySelectorAll('.tab-link').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          document.querySelectorAll('.tab-link').forEach(l => l.removeAttribute('aria-current'));
+          link.setAttribute('aria-current', 'page');
+          const tab = link.dataset.tab;
+          ['solicitudes','activos','vencidos','devueltos'].forEach(t => {
+            document.getElementById('panel-' + t).style.display = t === tab ? '' : 'none';
+          });
+        });
+      });
+
+      // --- Modales ---
+      function openModal(id) {
+        document.getElementById(id).classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.modal-backdrop').forEach(b => {
+        b.addEventListener('click', e => { if (e.target === b) closeModal(b.id); });
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.is-open').forEach(m => closeModal(m.id));
+      });
+
+      // --- Aprobar solicitud ---
+      function aprobar(btn) {
+        const fila = btn.closest('tr');
+        const stamp = fila.querySelector('.stamp');
+        stamp.textContent = 'Aprobada';
+        stamp.className = 'stamp stamp-available';
+        fila.querySelector('.row-actions').innerHTML = '<span style="font-size:0.78rem;color:var(--green-dark);font-weight:500">✓ Aprobada</span>';
+        actualizarBadge();
+      }
+
+      // --- Rechazar solicitud ---
+      function openModalRechazo(btn) {
+        filaRechazo = btn.closest('tr');
+        openModal('modal-rechazo');
+      }
+      function confirmarRechazo() {
+        if (!filaRechazo) return;
+        const motivo = document.getElementById('motivo-rechazo').value;
+        if (!motivo) { document.getElementById('motivo-rechazo').focus(); return; }
+        const stamp = filaRechazo.querySelector('.stamp');
+        stamp.textContent = 'Rechazada';
+        stamp.className = 'stamp stamp-overdue';
+        filaRechazo.querySelector('.row-actions').innerHTML = '<span style="font-size:0.78rem;color:var(--red);font-weight:500">✕ Rechazada</span>';
+        closeModal('modal-rechazo');
+        document.getElementById('motivo-rechazo').value = '';
+        document.getElementById('motivo-detalle').value = '';
+        filaRechazo = null;
+        actualizarBadge();
+      }
+
+      function actualizarBadge() {
+        const pendientes = document.querySelectorAll('#tabla-solicitudes .stamp-pending').length;
+        const badge = document.getElementById('badge-solicitudes');
+        if (pendientes === 0) { badge.style.display = 'none'; }
+        else { badge.textContent = pendientes; }
+      }
+
+      // --- Auto fecha vencimiento ---
+      document.getElementById('fecha-prestamo').addEventListener('change', function() {
+        const d = new Date(this.value);
+        d.setDate(d.getDate() + 14);
+        document.getElementById('fecha-vencimiento').value = d.toISOString().split('T')[0];
+      });
+    </script>
+  </body>
+</html>

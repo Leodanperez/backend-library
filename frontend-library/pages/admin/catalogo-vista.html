@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Catálogo · Administrador · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Administrador</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="usuarios.html"><span class="icon">☺</span> Usuarios</a></li>
+            <li><a href="reportes.html"><span class="icon">▦</span> Reportes</a></li>
+            <li><a href="catalogo-vista.html" aria-current="page"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Catálogo</h1>
+          </div>
+          <div class="user-chip">
+            <span class="topbar-meta">Administrador</span>
+            <span class="avatar" aria-hidden="true">RC</span>
+            <span>Rosa Castillo</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <header style="margin-bottom:1.5em">
+            <p class="text-soft">Vista de solo lectura. La gestión del catálogo (libros, autores, categorías y ejemplares) es responsabilidad de los bibliotecarios.</p>
+            <div style="display:inline-flex;align-items:center;gap:0.5em;background:var(--brass-tint);border:1.5px solid var(--brass);border-radius:var(--radius-s);padding:0.5em 0.9em;font-size:0.78rem;color:#5a3d10;margin-top:0.75em">
+              <span>👁</span> Solo lectura — para editar el catálogo, contacta a un bibliotecario
+            </div>
+          </header>
+
+          <nav class="tabs" aria-label="Secciones del catálogo">
+            <a href="#libros" aria-current="page" class="tab-link" data-tab="libros">Libros</a>
+            <a href="#autores" class="tab-link" data-tab="autores">Autores</a>
+            <a href="#categorias" class="tab-link" data-tab="categorias">Categorías</a>
+          </nav>
+
+          <!-- LIBROS -->
+          <div id="panel-libros">
+            <section class="table-card" aria-label="Libros">
+              <div class="table-card-head">
+                <form class="search-row" role="search" action="#">
+                  <label for="buscar-libro" class="sr-only">Buscar libro</label>
+                  <input type="search" id="buscar-libro" name="q" placeholder="Buscar por título, ISBN o autor…" />
+                  <select aria-label="Filtrar por categoría">
+                    <option>Todas las categorías</option>
+                    <option>Literatura</option>
+                    <option>Ingeniería de software</option>
+                    <option>Historia</option>
+                  </select>
+                </form>
+                <span style="font-size:0.78rem;color:var(--ink-soft);font-family:var(--font-mono)">1,284 libros</span>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Título</th>
+                      <th scope="col">Autor</th>
+                      <th scope="col">Categoría</th>
+                      <th scope="col">ISBN</th>
+                      <th scope="col">Ejemplares</th>
+                      <th scope="col">Disponibles</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">1967 · Editorial Sudamericana</span></td>
+                      <td>Gabriel García Márquez</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-376-0494-7</td>
+                      <td>6</td>
+                      <td><span class="stamp stamp-available">4 disp.</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Redes de computadoras</span><span class="cell-sub">2020 · Pearson</span></td>
+                      <td>Andrew S. Tanenbaum</td>
+                      <td>Ingeniería de software</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-0-13-359414-0</td>
+                      <td>3</td>
+                      <td><span class="stamp stamp-loaned">1 disp.</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">1963 · Seix Barral</span></td>
+                      <td>Mario Vargas Llosa</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-322-0641-2</td>
+                      <td>2</td>
+                      <td><span class="stamp stamp-overdue">0 disp.</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Los ríos profundos</span><span class="cell-sub">1958 · Losada</span></td>
+                      <td>José María Arguedas</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-206-3345-1</td>
+                      <td>2</td>
+                      <td><span class="stamp stamp-available">1 disp.</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">El Aleph</span><span class="cell-sub">1949 · Losada</span></td>
+                      <td>Jorge Luis Borges</td>
+                      <td>Literatura</td>
+                      <td style="font-family:var(--font-mono);font-size:0.78rem">978-84-206-1941-7</td>
+                      <td>3</td>
+                      <td><span class="stamp stamp-available">2 disp.</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–5 de 1,284</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- AUTORES -->
+          <div id="panel-autores" style="display:none">
+            <section class="table-card" aria-label="Autores">
+              <div class="table-card-head">
+                <form class="search-row" role="search" action="#">
+                  <input type="search" placeholder="Buscar autor…" />
+                </form>
+                <span style="font-size:0.78rem;color:var(--ink-soft);font-family:var(--font-mono)">312 autores</span>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Nombre</th>
+                      <th scope="col">Nacionalidad</th>
+                      <th scope="col">Libros en catálogo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title">Gabriel García Márquez</td>
+                      <td>Colombia</td>
+                      <td>3</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Mario Vargas Llosa</td>
+                      <td>Perú</td>
+                      <td>5</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Andrew S. Tanenbaum</td>
+                      <td>Países Bajos</td>
+                      <td>2</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Jorge Luis Borges</td>
+                      <td>Argentina</td>
+                      <td>4</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">José María Arguedas</td>
+                      <td>Perú</td>
+                      <td>3</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <span>Mostrando 1–5 de 312</span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" disabled>Anterior</button>
+                  <button class="btn btn-secondary">Siguiente</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- CATEGORÍAS -->
+          <div id="panel-categorias" style="display:none">
+            <section class="table-card" aria-label="Categorías">
+              <div class="table-card-head">
+                <h2 style="margin:0;font-size:var(--step1)">Categorías del catálogo</h2>
+                <span style="font-size:0.78rem;color:var(--ink-soft);font-family:var(--font-mono)">12 categorías</span>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Nombre</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Libros</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title">Literatura</td>
+                      <td>Novela, cuento y poesía en español y traducciones.</td>
+                      <td>412</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Ingeniería de software</td>
+                      <td>Programación, redes y arquitectura de sistemas.</td>
+                      <td>198</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Historia</td>
+                      <td>Historia universal y del Perú.</td>
+                      <td>156</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Ciencias naturales</td>
+                      <td>Biología, química, física y ciencias de la tierra.</td>
+                      <td>134</td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Matemáticas</td>
+                      <td>Álgebra, cálculo, estadística y geometría.</td>
+                      <td>98</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.querySelectorAll('.tab-link').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          document.querySelectorAll('.tab-link').forEach(l => l.removeAttribute('aria-current'));
+          link.setAttribute('aria-current', 'page');
+          ['libros','autores','categorias'].forEach(t => {
+            document.getElementById('panel-' + t).style.display = link.dataset.tab === t ? '' : 'none';
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

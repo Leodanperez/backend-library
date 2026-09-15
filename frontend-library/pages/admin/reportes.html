@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reportes · Administrador · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+    <style>
+      .reporte-card {
+        background: var(--surface-raised);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-m);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+      }
+      .reporte-card-head {
+        padding: 1em 1.25em;
+        border-bottom: 1.5px solid var(--border);
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1em;
+        flex-wrap: wrap;
+      }
+      .reporte-card-head h2 { margin: 0; font-size: var(--step1); }
+      .bar-chart { padding: 1.25em 1.5em; }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 9rem 1fr 3rem;
+        align-items: center;
+        gap: 0.75em;
+        margin-bottom: 0.75em;
+        font-size: var(--step1);
+      }
+      .bar-row:last-child { margin-bottom: 0; }
+      .bar-label { color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .bar-track {
+        height: 0.6em;
+        background: var(--surface-alt);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--green), #6aaa6e);
+        transition: width 0.6s ease;
+      }
+      .bar-fill.amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
+      .bar-fill.red   { background: linear-gradient(90deg, var(--red), #c0504a); }
+      .bar-value { font-family: var(--font-mono); font-weight: 600; font-size: 0.78rem; text-align: right; }
+    </style>
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Administrador</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="usuarios.html"><span class="icon">☺</span> Usuarios</a></li>
+            <li><a href="reportes.html" aria-current="page"><span class="icon">▦</span> Reportes</a></li>
+            <li><a href="catalogo-vista.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Reportes</h1>
+          </div>
+          <div class="user-chip">
+            <span class="topbar-meta">Administrador</span>
+            <span class="avatar" aria-hidden="true">RC</span>
+            <span>Rosa Castillo</span>
+          </div>
+        </header>
+
+        <div class="page">
+          <header style="margin-bottom:1.75em;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1em">
+            <div>
+              <p class="text-soft" style="margin:0">Estadísticas generales del sistema. Solo lectura — los datos son gestionados por los bibliotecarios.</p>
+            </div>
+            <div style="display:flex;gap:0.5em">
+              <select style="width:auto" aria-label="Período">
+                <option>Este mes</option>
+                <option>Últimos 3 meses</option>
+                <option>Este año</option>
+              </select>
+              <button class="btn btn-secondary">Exportar CSV</button>
+            </div>
+          </header>
+
+          <!-- KPIs -->
+          <div class="stat-grid" style="margin-bottom:2em">
+            <div class="stat-card">
+              <span class="stat-value">2,940</span>
+              <span class="stat-label">Préstamos este año</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">142</span>
+              <span class="stat-label">Préstamos activos</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" style="color:var(--red)">18</span>
+              <span class="stat-label">Vencidos sin devolver</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">3.2</span>
+              <span class="stat-label">Días promedio de retraso</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">94%</span>
+              <span class="stat-label">Tasa de devolución a tiempo</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value">8.3</span>
+              <span class="stat-label">Préstamos por estudiante/año</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(22rem,1fr));gap:1.25em;margin-bottom:2em">
+
+            <!-- Libros más prestados -->
+            <div class="reporte-card">
+              <div class="reporte-card-head">
+                <h2>Libros más prestados</h2>
+                <span style="font-size:0.75rem;color:var(--ink-soft);font-family:var(--font-mono)">Este mes</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-row">
+                  <span class="bar-label">Cien años de soledad</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:92%"></div></div>
+                  <span class="bar-value">46</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">El Aleph</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:74%"></div></div>
+                  <span class="bar-value">37</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Redes de computadoras</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:60%"></div></div>
+                  <span class="bar-value">30</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Los ríos profundos</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:48%"></div></div>
+                  <span class="bar-value">24</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">La ciudad y los perros</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:36%"></div></div>
+                  <span class="bar-value">18</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Categorías más solicitadas -->
+            <div class="reporte-card">
+              <div class="reporte-card-head">
+                <h2>Categorías más solicitadas</h2>
+                <span style="font-size:0.75rem;color:var(--ink-soft);font-family:var(--font-mono)">Este mes</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-row">
+                  <span class="bar-label">Literatura</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>
+                  <span class="bar-value">312</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Ing. de software</span>
+                  <div class="bar-track"><div class="bar-fill amber" style="width:55%"></div></div>
+                  <span class="bar-value">194</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Historia</span>
+                  <div class="bar-track"><div class="bar-fill amber" style="width:38%"></div></div>
+                  <span class="bar-value">134</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Matemáticas</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:24%"></div></div>
+                  <span class="bar-value">86</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Ciencias naturales</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:18%"></div></div>
+                  <span class="bar-value">64</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estudiantes con más préstamos -->
+            <div class="reporte-card">
+              <div class="reporte-card-head">
+                <h2>Estudiantes más activos</h2>
+                <span style="font-size:0.75rem;color:var(--ink-soft);font-family:var(--font-mono)">Este año</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-row">
+                  <span class="bar-label">Micaela Ríos</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+                  <span class="bar-value">14</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Ana Belén Soto</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:78%"></div></div>
+                  <span class="bar-value">11</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Fabrizio Torres</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:64%"></div></div>
+                  <span class="bar-value">9</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Karla Medina</span>
+                  <div class="bar-track"><div class="bar-fill" style="width:50%"></div></div>
+                  <span class="bar-value">7</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Jhon Quispe</span>
+                  <div class="bar-track"><div class="bar-fill red" style="width:36%"></div></div>
+                  <span class="bar-value">5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Préstamos vencidos por bibliotecario -->
+            <div class="reporte-card">
+              <div class="reporte-card-head">
+                <h2>Vencidos por bibliotecario</h2>
+                <span style="font-size:0.75rem;color:var(--ink-soft);font-family:var(--font-mono)">Acumulado</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-row">
+                  <span class="bar-label">Aldo Fernández</span>
+                  <div class="bar-track"><div class="bar-fill amber" style="width:80%"></div></div>
+                  <span class="bar-value">12</span>
+                </div>
+                <div class="bar-row">
+                  <span class="bar-label">Diana Salas</span>
+                  <div class="bar-track"><div class="bar-fill amber" style="width:40%"></div></div>
+                  <span class="bar-value">6</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tabla de préstamos completa -->
+          <div class="reporte-card">
+            <div class="reporte-card-head">
+              <h2>Historial completo de préstamos</h2>
+              <div style="display:flex;gap:0.5em;flex-wrap:wrap">
+                <input type="date" aria-label="Desde" style="width:auto" />
+                <input type="date" aria-label="Hasta" style="width:auto" />
+                <button class="btn btn-secondary">Filtrar</button>
+                <button class="btn btn-secondary">Exportar CSV</button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Libro / ejemplar</th>
+                    <th scope="col">Estudiante</th>
+                    <th scope="col">Bibliotecario</th>
+                    <th scope="col">Préstamo</th>
+                    <th scope="col">Vence / Devuelto</th>
+                    <th scope="col">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">EJ-0104</span></td>
+                    <td>Jhon Quispe Mamani</td>
+                    <td>Aldo Fernández</td>
+                    <td>02 mar 2026</td>
+                    <td>16 mar 2026</td>
+                    <td><span class="stamp stamp-overdue">Vencido</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">EJ-0231</span></td>
+                    <td>Micaela Ríos Paredes</td>
+                    <td>Aldo Fernández</td>
+                    <td>10 mar 2026</td>
+                    <td>24 mar 2026</td>
+                    <td><span class="stamp stamp-loaned">Prestado</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">Redes de computadoras</span><span class="cell-sub">EJ-0489</span></td>
+                    <td>Fabrizio Torres Luna</td>
+                    <td>Diana Salas</td>
+                    <td>15 mar 2026</td>
+                    <td>29 mar 2026</td>
+                    <td><span class="stamp stamp-loaned">Prestado</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">Los ríos profundos</span><span class="cell-sub">EJ-0077</span></td>
+                    <td>Ana Belén Soto</td>
+                    <td>Diana Salas</td>
+                    <td>20 feb 2026</td>
+                    <td>06 mar 2026</td>
+                    <td><span class="stamp stamp-available">Devuelto</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-title">El Aleph</span><span class="cell-sub">EJ-0312</span></td>
+                    <td>Karla Medina Solís</td>
+                    <td>Aldo Fernández</td>
+                    <td>01 feb 2026</td>
+                    <td>15 feb 2026</td>
+                    <td><span class="stamp stamp-available">Devuelto</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span>Mostrando 1–5 de 3,100</span>
+              <div style="display:flex;gap:0.5em">
+                <button class="btn btn-secondary" disabled>Anterior</button>
+                <button class="btn btn-secondary">Siguiente</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -5,7 +5,6 @@ import dev.leo.library.application.dto.response.BookCatalogResponse;
 import dev.leo.library.application.dto.response.BookDetailResponse;
 import dev.leo.library.application.dto.response.BookResponse;
 import dev.leo.library.application.dto.response.SelectOptionsResponse.SelectItem;
-import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookEntity;
 import dev.leo.library.shared.dto.PaginatedResponse;
 import java.util.List;
 import java.util.Set;
@@ -22,5 +21,4 @@ public interface BookUseCase {
     void activate(Long id);
     void deactivate(Long id);
     void delete(Long id);
-    BookEntity findEntityById(Long id);
 }

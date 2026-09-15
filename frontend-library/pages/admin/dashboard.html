@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel · Administrador · Biblioteca del Instituto</title>
+    <link rel="stylesheet" href="../../css/styles.css" />
+  </head>
+  <body>
+    <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
+    <div class="app-shell">
+      <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
+
+      <aside class="sidebar" aria-label="Navegación principal">
+        <p class="sidebar-brand"><span class="mark">◧</span> Biblioteca</p>
+        <p class="sidebar-role">Administrador</p>
+        <nav>
+          <ul class="sidebar-nav">
+            <li><a href="dashboard.html" aria-current="page"><span class="icon">▤</span> Panel</a></li>
+            <li><a href="usuarios.html"><span class="icon">☺</span> Usuarios</a></li>
+            <li><a href="reportes.html"><span class="icon">▦</span> Reportes</a></li>
+            <li><a href="catalogo-vista.html"><span class="icon">▥</span> Catálogo</a></li>
+          </ul>
+        </nav>
+        <div class="sidebar-foot">
+          <ul class="sidebar-nav">
+            <li><a href="../login.html"><span class="icon">⏻</span> Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="content">
+        <header class="topbar">
+          <div style="display:flex;align-items:center;gap:1em">
+            <label for="sidebar-toggle" class="menu-btn">☰ Menú</label>
+            <h1>Panel general</h1>
+          </div>
+          <div class="user-chip">
+            <span class="topbar-meta">Administrador</span>
+            <span class="avatar" aria-hidden="true">RC</span>
+            <span>Rosa Castillo</span>
+          </div>
+        </header>
+
+        <div class="page">
+
+          <!-- Bienvenida -->
+          <div style="background:linear-gradient(135deg,var(--green-dark),#1a2e1c);border-radius:var(--radius-m);padding:1.75em 2em;margin-bottom:2em;color:var(--surface-raised);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1em">
+            <div>
+              <p style="margin:0 0 0.2em;font-family:var(--font-mono);font-size:0.75rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.06em">Bienvenida de vuelta</p>
+              <h2 style="margin:0;font-size:var(--step3);color:#fff">Rosa Castillo</h2>
+              <p style="margin:0.3em 0 0;font-size:var(--step1);opacity:0.7">Administradora del sistema · Biblioteca del Instituto</p>
+            </div>
+            <div style="font-size:3.5rem;opacity:0.15">◧</div>
+          </div>
+
+          <!-- Stats -->
+          <section aria-label="Resumen del sistema" style="margin-bottom:2em">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <span class="stat-value">356</span>
+                <span class="stat-label">Usuarios registrados</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">345</span>
+                <span class="stat-label">Estudiantes activos</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">8</span>
+                <span class="stat-label">Bibliotecarios</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">1,284</span>
+                <span class="stat-label">Libros en catálogo</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value">142</span>
+                <span class="stat-label">Préstamos activos</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-value" style="color:var(--red)">18</span>
+                <span class="stat-label">Préstamos vencidos</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Accesos rápidos -->
+          <section aria-labelledby="accesos-titulo" style="margin-bottom:2em">
+            <h2 id="accesos-titulo" style="font-size:var(--step1);margin-bottom:1em">Accesos rápidos</h2>
+            <div class="stat-grid">
+              <a href="usuarios.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <div style="font-size:1.5rem;margin-bottom:0.5em">☺</div>
+                <h3>Gestionar usuarios</h3>
+                <p class="text-soft" style="margin:0">Registra, edita y activa/desactiva cuentas de estudiantes y bibliotecarios.</p>
+              </a>
+              <a href="reportes.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <div style="font-size:1.5rem;margin-bottom:0.5em">▦</div>
+                <h3>Ver reportes</h3>
+                <p class="text-soft" style="margin:0">Consulta estadísticas de préstamos, usuarios activos y actividad general.</p>
+              </a>
+              <a href="catalogo-vista.html" class="card card-pad" style="text-decoration:none;color:inherit">
+                <div style="font-size:1.5rem;margin-bottom:0.5em">▥</div>
+                <h3>Ver catálogo</h3>
+                <p class="text-soft" style="margin:0">Consulta el inventario de libros y ejemplares gestionado por los bibliotecarios.</p>
+              </a>
+            </div>
+          </section>
+
+          <!-- Usuarios recientes -->
+          <section aria-labelledby="usuarios-recientes-titulo" style="margin-bottom:2em">
+            <div class="table-card">
+              <div class="table-card-head">
+                <h2 id="usuarios-recientes-titulo" style="margin:0;font-size:var(--step1)">Usuarios registrados recientemente</h2>
+                <a href="usuarios.html" class="btn btn-secondary">Ver todos</a>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Nombre</th>
+                      <th scope="col">Correo</th>
+                      <th scope="col">Rol</th>
+                      <th scope="col">Registro</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="cell-title">Micaela Ríos Paredes</td>
+                      <td>micaela.rios@instituto.edu.pe</td>
+                      <td>Estudiante</td>
+                      <td>04 ene 2025</td>
+                      <td><span class="stamp stamp-available">Activo</span></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Fabrizio Torres Luna</td>
+                      <td>fabrizio.torres@instituto.edu.pe</td>
+                      <td>Estudiante</td>
+                      <td>10 feb 2025</td>
+                      <td><span class="stamp stamp-available">Activo</span></td>
+                    </tr>
+                    <tr>
+                      <td class="cell-title">Diana Salas Quispe</td>
+                      <td>diana.salas@instituto.edu.pe</td>
+                      <td>Bibliotecario</td>
+                      <td>03 mar 2025</td>
+                      <td><span class="stamp stamp-available">Activo</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Actividad de préstamos (solo lectura) -->
+          <section aria-labelledby="actividad-titulo">
+            <div class="table-card">
+              <div class="table-card-head">
+                <h2 id="actividad-titulo" style="margin:0;font-size:var(--step1)">Actividad reciente de préstamos</h2>
+                <a href="reportes.html" class="btn btn-secondary">Ver reporte completo</a>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Ejemplar</th>
+                      <th scope="col">Estudiante</th>
+                      <th scope="col">Bibliotecario</th>
+                      <th scope="col">Préstamo</th>
+                      <th scope="col">Vence</th>
+                      <th scope="col">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><span class="cell-title">La ciudad y los perros</span><span class="cell-sub">EJ-0231</span></td>
+                      <td>Micaela Ríos Paredes</td>
+                      <td>Aldo Fernández</td>
+                      <td>10 mar 2026</td>
+                      <td>24 mar 2026</td>
+                      <td><span class="stamp stamp-loaned">Prestado</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Cien años de soledad</span><span class="cell-sub">EJ-0104</span></td>
+                      <td>Jhon Quispe Mamani</td>
+                      <td>Aldo Fernández</td>
+                      <td>02 mar 2026</td>
+                      <td>16 mar 2026</td>
+                      <td><span class="stamp stamp-overdue">Vencido</span></td>
+                    </tr>
+                    <tr>
+                      <td><span class="cell-title">Redes de computadoras</span><span class="cell-sub">EJ-0489</span></td>
+                      <td>Fabrizio Torres Luna</td>
+                      <td>Diana Salas</td>
+                      <td>15 mar 2026</td>
+                      <td>29 mar 2026</td>
+                      <td><span class="stamp stamp-loaned">Prestado</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

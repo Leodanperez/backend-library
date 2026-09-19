@@ -4,7 +4,7 @@ import dev.leo.library.domain.model.CopyCondition;
 import dev.leo.library.domain.model.CopyStatus;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 public record BookCopyRequest(
         @NotNull(message = "El libro es obligatorio")
@@ -20,7 +20,7 @@ public record BookCopyRequest(
         CopyCondition condition,
 
         @PastOrPresent(message = "La fecha de adquisición no puede ser una fecha futura")
-        Instant acquisitionDate,
+        LocalDate acquisitionDate,
 
         @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a cero")
         @Digits(integer = 8, fraction = 2, message = "El precio no tiene un formato válido (máximo 8 enteros y 2 decimales)")

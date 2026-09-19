@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "books_copy", indexes = {
@@ -34,7 +35,7 @@ public class BookCopyEntity {
     private CopyCondition condition;
 
     @Column(name = "acquisition_date")
-    private Instant acquisitionDate;
+    private LocalDate acquisitionDate;
 
     @Column(name = "price", precision = 10, scale = 2)
     private BigDecimal price;

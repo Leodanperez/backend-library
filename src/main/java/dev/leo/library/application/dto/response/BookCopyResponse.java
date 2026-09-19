@@ -5,13 +5,14 @@ import dev.leo.library.domain.model.CopyStatus;
 import dev.leo.library.infrastructure.adapter.output.persistence.entity.BookCopyEntity;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record BookCopyResponse(
         Long id,
         String code,
         CopyStatus status,
         CopyCondition condition,
-        Instant acquisitionDate,
+        LocalDate acquisitionDate,
         BigDecimal price,
         String location,
         Long bookId,

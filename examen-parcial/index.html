@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Exámenes</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+
+<header>
+    <div>
+        <span>INTRANET</span>
+        <h1>Gestión de Exámenes</h1>
+    </div>
+
+    <nav>
+        <a href="#">Inicio</a>
+        <a href="#">Exámenes</a>
+        <a href="#">Cursos</a>
+    </nav>
+</header>
+
+<main>
+
+    <section>
+        <article>
+            <header>
+                <div>
+                    <small>REGISTROS</small>
+                    <h2>Exámenes programados</h2>
+                    <p>Consulta y administra los exámenes registrados.</p>
+                </div>
+
+                <strong>12 exámenes</strong>
+            </header>
+
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Materia</th>
+                        <th>Fecha</th>
+                        <th>Aula</th>
+                        <th>Duración</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr>
+                        <td>
+                            <strong>Programación Web</strong>
+                        </td>
+                        <td>15/10/2026</td>
+                        <td>Laboratorio 01</td>
+                        <td>120 min</td>
+                        <td>
+                            <span class="estado activo">Activo</span>
+                        </td>
+                        <td>
+                            <div class="acciones">
+                                <button type="button" title="Editar">✎</button>
+                                <button type="button" title="Eliminar">×</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Base de Datos</strong>
+                        </td>
+                        <td>18/10/2026</td>
+                        <td>Aula 204</td>
+                        <td>90 min</td>
+                        <td>
+                            <span class="estado activo">Activo</span>
+                        </td>
+                        <td>
+                            <div class="acciones">
+                                <button type="button" title="Editar">✎</button>
+                                <button type="button" title="Eliminar">×</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Ingeniería de Software</strong>
+                        </td>
+                        <td>21/10/2026</td>
+                        <td>Aula 305</td>
+                        <td>60 min</td>
+                        <td>
+                            <span class="estado inactivo">Inactivo</span>
+                        </td>
+                        <td>
+                            <div class="acciones">
+                                <button type="button" title="Editar">✎</button>
+                                <button type="button" title="Eliminar">×</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <strong>Desarrollo Backend</strong>
+                        </td>
+                        <td>25/10/2026</td>
+                        <td>Laboratorio 02</td>
+                        <td>120 min</td>
+                        <td>
+                            <span class="estado activo">Activo</span>
+                        </td>
+                        <td>
+                            <div class="acciones">
+                                <button type="button" title="Editar">✎</button>
+                                <button type="button" title="Eliminar">×</button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer>
+                <span>Mostrando 4 de 12 registros</span>
+
+                <div class="paginacion">
+                    <button type="button">‹</button>
+                    <button type="button" class="seleccionado">1</button>
+                    <button type="button">2</button>
+                    <button type="button">3</button>
+                    <button type="button">›</button>
+                </div>
+            </footer>
+        </article>
+
+        <article>
+            <header>
+                <small>NUEVO REGISTRO</small>
+                <h2>Registrar examen</h2>
+                <p>Completa los datos para programar un examen.</p>
+            </header>
+
+            <form>
+
+                <label for="subject">
+                    Materia
+                </label>
+                <input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        maxlength="100"
+                        placeholder="Ej. Programación Web"
+                        required
+                >
+
+                <label for="date">
+                    Fecha
+                </label>
+                <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        required
+                >
+
+                <label for="classroom">
+                    Aula
+                </label>
+                <input
+                        type="text"
+                        id="classroom"
+                        name="classroom"
+                        maxlength="50"
+                        placeholder="Ej. Laboratorio 01"
+                        required
+                >
+
+                <label for="durationMinutes">
+                    Duración
+                </label>
+
+                <div class="duracion">
+                    <input
+                            type="number"
+                            id="durationMinutes"
+                            name="durationMinutes"
+                            min="1"
+                            placeholder="120"
+                            required
+                    >
+
+                    <span>minutos</span>
+                </div>
+
+                <div class="resumen">
+                    <span>Estado inicial</span>
+                    <strong>Activo</strong>
+                </div>
+
+                <div class="formulario-acciones">
+                    <button type="reset">Limpiar</button>
+                    <button type="submit">Registrar examen</button>
+                </div>
+
+            </form>
+        </article>
+    </section>
+
+</main>
+
+<footer>
+    <p>© 2026 Intranet Educativa · Gestión Académica</p>
+</footer>
+
+<script src="./js/script.js"></script>
+</body>
+</html>

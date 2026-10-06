@@ -1,6 +1,7 @@
 package dev.leo.library.shared.exception;
 
 import dev.leo.library.domain.exception.*;
+import dev.leo.library.domain.exception.ExamNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,7 +22,8 @@ public class GlobalExceptionHandler {
         UserNotFoundException.class,
         LoanStatusNotFoundException.class,
         PublisherNotFoundException.class,
-        LocationNotFoundException.class
+        LocationNotFoundException.class,
+        ExamNotFoundException.class
     })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(RuntimeException ex) {

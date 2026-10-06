@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/catalog", "/api/v1/catalog/**").permitAll()
                 .requestMatchers("/api/v1/publishers/**", "/api/v1/locations/**").permitAll()
+                .requestMatchers("/api/v1/exams/**").permitAll()
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

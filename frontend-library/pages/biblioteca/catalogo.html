@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Catálogo · Bibliotecario · Biblioteca del Instituto</title>
     <link rel="stylesheet" href="../../css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
-  <body>
+  <body data-role-required="LIBRARIAN">
     <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
     <div class="app-shell">
       <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
@@ -36,8 +37,8 @@
             <h1>Catálogo</h1>
           </div>
           <div class="user-chip">
-            <span class="avatar" aria-hidden="true">AF</span>
-            <span>Aldo Fernández</span>
+            <span class="avatar" aria-hidden="true" id="topbar-avatar"></span>
+            <span id="topbar-nombre"></span>
           </div>
         </header>
 
@@ -262,8 +263,15 @@
           <div id="panel-categorias" style="display:none">
             <section class="table-card" aria-label="Categorías">
               <div class="table-card-head">
-                <h2 style="margin:0;font-size:var(--step1)">Categorías del catálogo</h2>
-                <button class="btn btn-primary" onclick="openModal('modal-categoria')">+ Nueva categoría</button>
+                <div class="search-row">
+                  <input type="search" id="cat-search" placeholder="Buscar categoría…" />
+                  <select id="cat-filter-active" aria-label="Filtrar por estado">
+                    <option value="">Todos los estados</option>
+                    <option value="true">Activas</option>
+                    <option value="false">Inactivas</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" id="btn-nueva-categoria">+ Nueva categoría</button>
               </div>
               <div class="table-scroll">
                 <table>
@@ -272,36 +280,21 @@
                       <th scope="col">Nombre</th>
                       <th scope="col">Descripción</th>
                       <th scope="col">Libros</th>
+                      <th scope="col">Estado</th>
                       <th scope="col"><span class="sr-only">Acciones</span></th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td class="cell-title">Literatura</td>
-                      <td>Novela, cuento y poesía en español y traducciones.</td>
-                      <td>412</td>
-                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
-                    </tr>
-                    <tr>
-                      <td class="cell-title">Ingeniería de software</td>
-                      <td>Programación, redes y arquitectura de sistemas.</td>
-                      <td>198</td>
-                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
-                    </tr>
-                    <tr>
-                      <td class="cell-title">Historia</td>
-                      <td>Historia universal y del Perú.</td>
-                      <td>156</td>
-                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
-                    </tr>
-                    <tr>
-                      <td class="cell-title">Matemáticas</td>
-                      <td>Álgebra, cálculo, estadística y geometría.</td>
-                      <td>98</td>
-                      <td><div class="row-actions"><button class="btn btn-quiet" onclick="openModal('modal-categoria')">Editar</button><button class="btn btn-danger btn-quiet">Eliminar</button></div></td>
-                    </tr>
+                  <tbody id="cat-tbody">
+                    <tr><td colspan="5" style="text-align:center;padding:2em;color:var(--ink-soft)">Cargando…</td></tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="pagination">
+                <span id="cat-pag-info"></span>
+                <div style="display:flex;gap:0.5em">
+                  <button class="btn btn-secondary" id="cat-pag-prev" disabled>Anterior</button>
+                  <button class="btn btn-secondary" id="cat-pag-next">Siguiente</button>
+                </div>
               </div>
             </section>
           </div>
@@ -478,6 +471,7 @@
         </div>
         <div class="modal-body">
           <form id="form-categoria" novalidate>
+            <div id="cat-form-error" class="form-error"></div>
             <div class="field">
               <label for="cat-nombre">Nombre de la categoría</label>
               <input type="text" id="cat-nombre" name="nombre" placeholder="Ej. Ciencias naturales" required />
@@ -495,6 +489,8 @@
       </div>
     </div>
 
+    <script src="../../js/auth-guard.js"></script>
+    <script src="../../js/categoria.js"></script>
     <script>
       const TABS = ['libros','ejemplares','autores','categorias'];
 

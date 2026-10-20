@@ -31,18 +31,18 @@ async function protectPage() {
       return;
     }
 
-    const user = await response.json(); // ej. { role: "ADMIN", nombre: "Rosa Castillo" }
+    const user = await response.json();
+    const nombre = [user.firstName, user.lastName].filter(Boolean).join(" ");
 
     if (requiredRole && user.role !== requiredRole) {
-      // Sesión válida, pero entrando a una carpeta que no le corresponde
       window.location.href = LOGIN_PATH;
       return;
     }
 
-    // Sesión válida y rol correcto: ahora sí mostramos el contenido
     sessionStorage.setItem("role", user.role);
-    if (user.nombre) sessionStorage.setItem("nombre", user.nombre);
+    sessionStorage.setItem("nombre", nombre);
     document.documentElement.classList.remove("auth-checking");
+    fillSession(nombre);
   } catch (err) {
     window.location.href = LOGIN_PATH;
   }
@@ -50,6 +50,20 @@ async function protectPage() {
 
 // Corre apenas el DOM está listo para leer data-role-required
 document.addEventListener("DOMContentLoaded", protectPage);
+
+function fillSession(nombre) {
+  const initials = nombre.split(" ").filter(Boolean).slice(0, 2).map(n => n[0]).join("").toUpperCase();
+  const elNombre = document.getElementById("topbar-nombre");
+  const elAvatar = document.getElementById("topbar-avatar");
+  if (elNombre) elNombre.textContent = nombre;
+  if (elAvatar) elAvatar.textContent = initials;
+  document.querySelectorAll(".topnav-nombre").forEach(el => { el.textContent = nombre; });
+  document.querySelectorAll(".topnav-avatar").forEach(el => { el.textContent = initials; });
+  const elDash = document.getElementById("dash-nombre");
+  if (elDash) elDash.textContent = nombre;
+  const elWelcome = document.getElementById("welcome-nombre");
+  if (elWelcome) elWelcome.textContent = nombre;
+}
 
 /**
  * Llama esto desde el botón "Cerrar sesión" de cada layout.

@@ -6,7 +6,7 @@
     <title>Préstamos · Administrador · Biblioteca del Instituto</title>
     <link rel="stylesheet" href="../../css/styles.css" />
   </head>
-  <body>
+  <body data-role-required="ADMIN">
     <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
 
     <div class="app-shell">
@@ -38,8 +38,8 @@
           </div>
           <div class="user-chip">
             <span class="topbar-meta">Administrador</span>
-            <span class="avatar" aria-hidden="true">RC</span>
-            <span>Rosa Castillo</span>
+            <span class="avatar" aria-hidden="true" id="topbar-avatar"></span>
+            <span id="topbar-nombre"></span>
           </div>
         </header>
 
@@ -199,6 +199,7 @@
       </div>
     </div>
 
+    <script src="../../js/auth-guard.js"></script>
     <script>
       function openModal(id) {
         document.getElementById(id).classList.add('is-open');

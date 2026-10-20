@@ -107,7 +107,7 @@
       .request-success.show { display: flex; }
     </style>
   </head>
-  <body>
+  <body data-role-required="STUDENT">
     <header class="topnav">
       <a href="catalogo.html" class="topnav-brand"><span class="mark">◧</span> Biblioteca</a>
       <nav aria-label="Navegación de estudiante">
@@ -117,6 +117,10 @@
           <li><a href="../login.html">Salir</a></li>
         </ul>
       </nav>
+      <div class="user-chip">
+        <span class="avatar topnav-avatar" aria-hidden="true"></span>
+        <span class="topnav-nombre"></span>
+      </div>
     </header>
 
     <main class="page" style="max-width:68rem;margin:0 auto">
@@ -268,6 +272,7 @@
       </div>
     </div>
 
+    <script src="../../js/auth-guard.js"></script>
     <script>
       function openModal(id) {
         document.getElementById(id).classList.add('is-open');

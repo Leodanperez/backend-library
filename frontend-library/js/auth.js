@@ -11,13 +11,14 @@
    ========================================================= */
 
 const API_URL = "http://localhost:8080/api/v1/auth/login";
+const BASE_URL = "http://localhost:8080/api/v1/auth";
 
 // A qué carpeta va cada rol una vez logueado.
 // Las rutas son relativas a pages/login.html
 const ROLE_HOME = {
   ADMIN: "admin/dashboard.html",
   LIBRARIAN: "biblioteca/dashboard.html",
-  STUDENT: "student/dashboard.html",
+  STUDENT: "student/catalogo.html",
 };
 
 function showError(message) {
@@ -42,7 +43,7 @@ async function handleLoginSubmit(event) {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // <- CLAVE: permite que el navegador guarde la cookie httpOnly
+      credentials: "include",
       body: JSON.stringify({ email, password }),
     });
 
@@ -51,18 +52,19 @@ async function handleLoginSubmit(event) {
       return;
     }
 
-    // El JWT ya quedó guardado como cookie httpOnly por el navegador.
-    // Lo único que necesitamos del body es el rol, para saber a dónde redirigir.
-    const data = await response.json(); // ej. { role: "ADMIN", nombre: "Rosa Castillo" }
-    const role = data.role;
+    // La cookie httpOnly ya quedó seteada. Consultamos /me para obtener el rol.
+    const me = await fetch(`${BASE_URL}/me`, { credentials: "include" });
+    if (!me.ok) {
+      showError("No se pudo obtener la información del usuario.");
+      return;
+    }
 
-    // Guardamos SOLO el rol (dato no sensible) para pintar la UI
-    // (nombre en la topbar, qué menú mostrar). La seguridad real
-    // la sigue validando el backend con la cookie en cada request.
-    sessionStorage.setItem("role", role);
-    if (data.nombre) sessionStorage.setItem("nombre", data.nombre);
+    const data = await me.json();
+    const nombre = [data.firstName, data.lastName].filter(Boolean).join(" ");
+    sessionStorage.setItem("role", data.role);
+    sessionStorage.setItem("nombre", nombre);
 
-    const destino = ROLE_HOME[role];
+    const destino = ROLE_HOME[data.role];
     if (!destino) {
       showError("Tu cuenta no tiene un rol válido asignado.");
       return;
@@ -70,6 +72,7 @@ async function handleLoginSubmit(event) {
 
     window.location.href = destino;
   } catch (err) {
+    console.error(err);
     showError("No se pudo conectar con el servidor. Intenta de nuevo.");
   }
 }

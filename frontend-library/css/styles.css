@@ -311,7 +311,7 @@ a.card:hover { box-shadow: 0 4px 20px -4px rgba(43,38,24,0.22); transform: trans
 }
 
 /* === PAGE === */
-.page { padding: 2em; max-width: 74rem; }
+.page { padding: 2em; max-width: 74rem; margin-inline: auto; }
 .page > header { margin-bottom: 1.75em; }
 
 /* === TOPNAV (estudiante) === */

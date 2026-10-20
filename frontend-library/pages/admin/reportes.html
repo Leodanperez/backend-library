@@ -52,7 +52,7 @@
       .bar-value { font-family: var(--font-mono); font-weight: 600; font-size: 0.78rem; text-align: right; }
     </style>
   </head>
-  <body>
+  <body data-role-required="ADMIN">
     <input type="checkbox" id="sidebar-toggle" class="sidebar-toggle" />
     <div class="app-shell">
       <label for="sidebar-toggle" class="sidebar-scrim" aria-hidden="true"></label>
@@ -83,8 +83,8 @@
           </div>
           <div class="user-chip">
             <span class="topbar-meta">Administrador</span>
-            <span class="avatar" aria-hidden="true">RC</span>
-            <span>Rosa Castillo</span>
+            <span class="avatar" aria-hidden="true" id="topbar-avatar"></span>
+            <span id="topbar-nombre"></span>
           </div>
         </header>
 
@@ -339,5 +339,6 @@
         </div>
       </div>
     </div>
+    <script src="../../js/auth-guard.js"></script>
   </body>
 </html>
